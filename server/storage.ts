@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "./db";
 import {
   users, meetings, events, literature, servicePositions,
-  newsletterSubscribers, newsletters,
+  newsletterSubscribers, newsletters, speakers, birthdaySignups,
   type User, type InsertUser,
   type Meeting, type InsertMeeting,
   type Event, type InsertEvent,
@@ -10,6 +10,8 @@ import {
   type ServicePosition, type InsertServicePosition,
   type NewsletterSubscriber, type InsertNewsletterSubscriber,
   type Newsletter, type InsertNewsletter,
+  type Speaker, type InsertSpeaker,
+  type BirthdaySignup, type InsertBirthdaySignup,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -44,6 +46,15 @@ export interface IStorage {
   getNewsletters(): Promise<Newsletter[]>;
   createNewsletter(newsletter: InsertNewsletter): Promise<Newsletter>;
   updateNewsletter(id: number, data: Partial<Newsletter>): Promise<Newsletter>;
+
+  getSpeakers(): Promise<Speaker[]>;
+  createSpeaker(speaker: InsertSpeaker): Promise<Speaker>;
+  updateSpeaker(id: number, data: Partial<Speaker>): Promise<Speaker>;
+  deleteSpeaker(id: number): Promise<void>;
+
+  getBirthdaySignups(): Promise<BirthdaySignup[]>;
+  createBirthdaySignup(signup: InsertBirthdaySignup): Promise<BirthdaySignup>;
+  deleteBirthdaySignup(id: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -160,6 +171,37 @@ export class DatabaseStorage implements IStorage {
   async updateNewsletter(id: number, data: Partial<Newsletter>): Promise<Newsletter> {
     const [updated] = await db.update(newsletters).set(data).where(eq(newsletters.id, id)).returning();
     return updated;
+  }
+
+  async getSpeakers(): Promise<Speaker[]> {
+    return db.select().from(speakers);
+  }
+
+  async createSpeaker(speaker: InsertSpeaker): Promise<Speaker> {
+    const [created] = await db.insert(speakers).values(speaker).returning();
+    return created;
+  }
+
+  async updateSpeaker(id: number, data: Partial<Speaker>): Promise<Speaker> {
+    const [updated] = await db.update(speakers).set(data).where(eq(speakers.id, id)).returning();
+    return updated;
+  }
+
+  async deleteSpeaker(id: number): Promise<void> {
+    await db.delete(speakers).where(eq(speakers.id, id));
+  }
+
+  async getBirthdaySignups(): Promise<BirthdaySignup[]> {
+    return db.select().from(birthdaySignups);
+  }
+
+  async createBirthdaySignup(signup: InsertBirthdaySignup): Promise<BirthdaySignup> {
+    const [created] = await db.insert(birthdaySignups).values(signup).returning();
+    return created;
+  }
+
+  async deleteBirthdaySignup(id: number): Promise<void> {
+    await db.delete(birthdaySignups).where(eq(birthdaySignups.id, id));
   }
 }
 

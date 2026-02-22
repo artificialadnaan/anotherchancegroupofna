@@ -73,6 +73,22 @@ export const newsletters = pgTable("newsletters", {
   status: text("status").notNull().default("draft"),
 });
 
+export const speakers = pgTable("speakers", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  speakerName: text("speaker_name").notNull(),
+  meetingDate: text("meeting_date").notNull(),
+  topic: text("topic"),
+  isConfirmed: boolean("is_confirmed").notNull().default(false),
+});
+
+export const birthdaySignups = pgTable("birthday_signups", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  name: text("name").notNull(),
+  cleanDate: text("clean_date").notNull(),
+  celebrationMonth: text("celebration_month").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -84,6 +100,8 @@ export const insertLiteratureSchema = createInsertSchema(literature).omit({ id: 
 export const insertServicePositionSchema = createInsertSchema(servicePositions).omit({ id: true });
 export const insertNewsletterSubscriberSchema = createInsertSchema(newsletterSubscribers).omit({ id: true, subscribedAt: true });
 export const insertNewsletterSchema = createInsertSchema(newsletters).omit({ id: true, sentAt: true, recipientCount: true });
+export const insertSpeakerSchema = createInsertSchema(speakers).omit({ id: true });
+export const insertBirthdaySignupSchema = createInsertSchema(birthdaySignups).omit({ id: true, createdAt: true });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -99,3 +117,7 @@ export type NewsletterSubscriber = typeof newsletterSubscribers.$inferSelect;
 export type InsertNewsletterSubscriber = z.infer<typeof insertNewsletterSubscriberSchema>;
 export type Newsletter = typeof newsletters.$inferSelect;
 export type InsertNewsletter = z.infer<typeof insertNewsletterSchema>;
+export type Speaker = typeof speakers.$inferSelect;
+export type InsertSpeaker = z.infer<typeof insertSpeakerSchema>;
+export type BirthdaySignup = typeof birthdaySignups.$inferSelect;
+export type InsertBirthdaySignup = z.infer<typeof insertBirthdaySignupSchema>;

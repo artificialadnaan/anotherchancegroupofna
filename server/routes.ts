@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
 import session from "express-session";
 import { storage } from "./storage";
-import { insertMeetingSchema, insertEventSchema, insertLiteratureSchema, insertNewsletterSubscriberSchema } from "@shared/schema";
+import { insertMeetingSchema, insertEventSchema, insertLiteratureSchema, insertNewsletterSubscriberSchema, insertSpeakerSchema, insertBirthdaySignupSchema } from "@shared/schema";
 
 declare module "express-session" {
   interface SessionData {
@@ -212,6 +212,73 @@ export async function registerRoutes(
       });
     } catch (error: any) {
       res.status(500).json({ message: error.message || "Failed to send newsletter" });
+    }
+  });
+
+  // Speaker management routes
+  app.get("/api/speakers", async (_req, res) => {
+    try {
+      const items = await storage.getSpeakers();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch speakers" });
+    }
+  });
+
+  app.post("/api/speakers", requireAdmin, async (req, res) => {
+    try {
+      const parsed = insertSpeakerSchema.parse(req.body);
+      const speaker = await storage.createSpeaker(parsed);
+      res.status(201).json(speaker);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Invalid speaker data" });
+    }
+  });
+
+  app.patch("/api/speakers/:id", requireAdmin, async (req, res) => {
+    try {
+      const updated = await storage.updateSpeaker(parseInt(req.params.id), req.body);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update speaker" });
+    }
+  });
+
+  app.delete("/api/speakers/:id", requireAdmin, async (req, res) => {
+    try {
+      await storage.deleteSpeaker(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete speaker" });
+    }
+  });
+
+  // Birthday night signup routes
+  app.get("/api/birthday-signups", async (_req, res) => {
+    try {
+      const items = await storage.getBirthdaySignups();
+      res.json(items);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch birthday signups" });
+    }
+  });
+
+  app.post("/api/birthday-signups", async (req, res) => {
+    try {
+      const parsed = insertBirthdaySignupSchema.parse(req.body);
+      const signup = await storage.createBirthdaySignup(parsed);
+      res.status(201).json(signup);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Invalid signup data" });
+    }
+  });
+
+  app.delete("/api/birthday-signups/:id", requireAdmin, async (req, res) => {
+    try {
+      await storage.deleteBirthdaySignup(parseInt(req.params.id));
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete signup" });
     }
   });
 

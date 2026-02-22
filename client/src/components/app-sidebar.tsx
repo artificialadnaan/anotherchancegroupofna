@@ -1,4 +1,4 @@
-import { Home, Clock, BookOpen, Users, CalendarDays, Mail, Settings, MapPin } from "lucide-react";
+import { Home, Clock, BookOpen, Users, CalendarDays, Mail, Settings, MapPin, CalendarHeart, Cake } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   Sidebar,
@@ -21,6 +21,8 @@ const publicItems = [
   { title: "Literature", url: "/literature", icon: BookOpen },
   { title: "Service Positions", url: "/service-positions", icon: Users },
   { title: "Events", url: "/events", icon: CalendarDays },
+  { title: "Group Calendar", url: "/group-calendar", icon: CalendarHeart },
+  { title: "Birthday Sign-Up", url: "/birthday-signup", icon: Cake },
   { title: "Newsletter", url: "/newsletter", icon: Mail },
 ];
 

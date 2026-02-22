@@ -14,6 +14,8 @@ import EventsPage from "@/pages/events";
 import NewsletterPage from "@/pages/newsletter";
 import AdminPage from "@/pages/admin";
 import AreaMeetingsPage from "@/pages/area-meetings";
+import GroupCalendarPage from "@/pages/group-calendar";
+import BirthdaySignupPage from "@/pages/birthday-signup";
 
 function Router() {
   return (
@@ -24,6 +26,8 @@ function Router() {
       <Route path="/literature" component={LiteraturePage} />
       <Route path="/service-positions" component={ServicePositionsPage} />
       <Route path="/events" component={EventsPage} />
+      <Route path="/group-calendar" component={GroupCalendarPage} />
+      <Route path="/birthday-signup" component={BirthdaySignupPage} />
       <Route path="/newsletter" component={NewsletterPage} />
       <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />

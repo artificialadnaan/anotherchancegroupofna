@@ -36,8 +36,12 @@ import {
   LogIn,
   LogOut,
   Lock,
+  Mic,
+  Cake,
+  Download,
+  Check,
 } from "lucide-react";
-import type { Meeting, Event, Literature, Newsletter, NewsletterSubscriber } from "@shared/schema";
+import type { Meeting, Event, Literature, Newsletter, NewsletterSubscriber, Speaker, BirthdaySignup } from "@shared/schema";
 
 function AdminMeetings() {
   const { data: meetings, isLoading } = useQuery<Meeting[]>({ queryKey: ["/api/meetings"] });
@@ -517,6 +521,234 @@ function AdminNewsletter() {
   );
 }
 
+function AdminSpeakers() {
+  const { data: speakersList, isLoading } = useQuery<Speaker[]>({ queryKey: ["/api/speakers"] });
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({
+    speakerName: "",
+    meetingDate: "",
+    topic: "",
+    isConfirmed: false,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/speakers", form);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/speakers"] });
+      setOpen(false);
+      setForm({ speakerName: "", meetingDate: "", topic: "", isConfirmed: false });
+      toast({ title: "Speaker added" });
+    },
+    onError: () => toast({ title: "Error adding speaker", variant: "destructive" }),
+  });
+
+  const toggleConfirm = useMutation({
+    mutationFn: async ({ id, isConfirmed }: { id: number; isConfirmed: boolean }) => {
+      await apiRequest("PATCH", `/api/speakers/${id}`, { isConfirmed: !isConfirmed });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/speakers"] });
+      toast({ title: "Speaker updated" });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/speakers/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/speakers"] });
+      toast({ title: "Speaker removed" });
+    },
+  });
+
+  const sortedSpeakers = speakersList?.slice().sort((a, b) => b.meetingDate.localeCompare(a.meetingDate)) ?? [];
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+        <h2 className="text-lg font-semibold">Speaker Meetings ({sortedSpeakers.length})</h2>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" data-testid="button-add-speaker">
+              <Plus className="w-4 h-4 mr-1" /> Add Speaker
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add Speaker</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <Label>Speaker Name</Label>
+                <Input value={form.speakerName} onChange={(e) => setForm({ ...form, speakerName: e.target.value })} placeholder="Enter speaker's name" data-testid="input-speaker-name" />
+              </div>
+              <div>
+                <Label>Meeting Date</Label>
+                <Input type="date" value={form.meetingDate} onChange={(e) => setForm({ ...form, meetingDate: e.target.value })} data-testid="input-speaker-date" />
+                <p className="text-xs text-muted-foreground mt-1">Select the Friday date of the speaker meeting</p>
+              </div>
+              <div>
+                <Label>Topic (optional)</Label>
+                <Input value={form.topic} onChange={(e) => setForm({ ...form, topic: e.target.value })} placeholder="Speaker's topic or theme" data-testid="input-speaker-topic" />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="isConfirmed"
+                  checked={form.isConfirmed}
+                  onChange={(e) => setForm({ ...form, isConfirmed: e.target.checked })}
+                  className="rounded"
+                  data-testid="input-speaker-confirmed"
+                />
+                <Label htmlFor="isConfirmed" className="text-sm">Confirmed</Label>
+              </div>
+              <Button onClick={() => createMutation.mutate()} disabled={createMutation.isPending || !form.speakerName || !form.meetingDate} className="w-full" data-testid="button-submit-speaker">
+                {createMutation.isPending ? "Adding..." : "Add Speaker"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+      {isLoading && <Skeleton className="h-32" />}
+      <div className="space-y-2">
+        {sortedSpeakers.map((speaker) => (
+          <div key={speaker.id} className="flex items-center justify-between gap-2 p-3 border rounded-md" data-testid={`admin-speaker-${speaker.id}`}>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm font-medium">{speaker.speakerName}</p>
+                <Badge variant={speaker.isConfirmed ? "default" : "secondary"} className="text-xs">
+                  {speaker.isConfirmed ? "Confirmed" : "Tentative"}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {new Date(speaker.meetingDate + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+                {speaker.topic && ` | "${speaker.topic}"`}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => toggleConfirm.mutate({ id: speaker.id, isConfirmed: speaker.isConfirmed })}
+                title={speaker.isConfirmed ? "Mark tentative" : "Confirm speaker"}
+                data-testid={`button-toggle-speaker-${speaker.id}`}
+              >
+                <Check className="w-4 h-4" />
+              </Button>
+              <Button size="icon" variant="ghost" onClick={() => deleteMutation.mutate(speaker.id)} data-testid={`button-delete-speaker-${speaker.id}`}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        ))}
+        {!isLoading && sortedSpeakers.length === 0 && (
+          <p className="text-sm text-muted-foreground p-4 text-center">No speakers scheduled yet. Add a speaker for upcoming Friday meetings.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AdminBirthdayReport() {
+  const { data: signups, isLoading } = useQuery<BirthdaySignup[]>({ queryKey: ["/api/birthday-signups"] });
+  const { toast } = useToast();
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/birthday-signups/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/birthday-signups"] });
+      toast({ title: "Signup removed" });
+    },
+  });
+
+  const filteredSignups = signups?.filter((s) => s.celebrationMonth === selectedMonth) ?? [];
+
+  const months: string[] = [];
+  const now = new Date();
+  for (let i = -2; i <= 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+  }
+
+  const formatMonthLabel = (m: string) => {
+    const [year, month] = m.split("-");
+    return new Date(parseInt(year), parseInt(month) - 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+        <h2 className="text-lg font-semibold">Birthday Night Sign-Ups</h2>
+        <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+          <SelectTrigger className="w-[200px]" data-testid="select-birthday-month">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {months.map((m) => (
+              <SelectItem key={m} value={m}>{formatMonthLabel(m)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Card className="mb-4">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-md bg-pink-100 dark:bg-pink-900/30">
+              <Cake className="w-5 h-5 text-pink-600 dark:text-pink-300" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold" data-testid="text-birthday-signup-count">{filteredSignups.length}</p>
+              <p className="text-xs text-muted-foreground">Celebrating in {formatMonthLabel(selectedMonth)}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {isLoading && <Skeleton className="h-32" />}
+      <div className="space-y-2">
+        {filteredSignups.map((signup) => {
+          const cleanDate = new Date(signup.cleanDate);
+          const diffDays = Math.floor((now.getTime() - cleanDate.getTime()) / (1000 * 60 * 60 * 24));
+          const years = Math.floor(diffDays / 365);
+          const remainingMonths = Math.floor((diffDays % 365) / 30);
+          let cleanTimeStr = "";
+          if (diffDays < 30) cleanTimeStr = `${diffDays} days`;
+          else if (diffDays < 365) cleanTimeStr = `${Math.floor(diffDays / 30)} months`;
+          else cleanTimeStr = years + (remainingMonths > 0 ? ` yr ${remainingMonths} mo` : ` year${years > 1 ? "s" : ""}`);
+
+          return (
+            <div key={signup.id} className="flex items-center justify-between gap-2 p-3 border rounded-md" data-testid={`admin-birthday-signup-${signup.id}`}>
+              <div className="min-w-0">
+                <p className="text-sm font-medium">{signup.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  Clean date: {cleanDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })} ({cleanTimeStr})
+                </p>
+              </div>
+              <Button size="icon" variant="ghost" onClick={() => deleteMutation.mutate(signup.id)} data-testid={`button-delete-birthday-${signup.id}`}>
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          );
+        })}
+        {!isLoading && filteredSignups.length === 0 && (
+          <p className="text-sm text-muted-foreground p-4 text-center">No sign-ups for {formatMonthLabel(selectedMonth)} yet.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -647,6 +879,12 @@ export default function AdminPage() {
             <TabsTrigger value="literature" data-testid="tab-literature">
               <BookOpen className="w-4 h-4 mr-1" /> Literature
             </TabsTrigger>
+            <TabsTrigger value="speakers" data-testid="tab-speakers">
+              <Mic className="w-4 h-4 mr-1" /> Speakers
+            </TabsTrigger>
+            <TabsTrigger value="birthdays" data-testid="tab-birthdays">
+              <Cake className="w-4 h-4 mr-1" /> Birthdays
+            </TabsTrigger>
             <TabsTrigger value="newsletter" data-testid="tab-newsletter">
               <Mail className="w-4 h-4 mr-1" /> Newsletter
             </TabsTrigger>
@@ -660,6 +898,12 @@ export default function AdminPage() {
         </TabsContent>
         <TabsContent value="literature">
           <AdminLiterature />
+        </TabsContent>
+        <TabsContent value="speakers">
+          <AdminSpeakers />
+        </TabsContent>
+        <TabsContent value="birthdays">
+          <AdminBirthdayReport />
         </TabsContent>
         <TabsContent value="newsletter">
           <AdminNewsletter />
