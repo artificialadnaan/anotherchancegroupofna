@@ -13,12 +13,14 @@ import ServicePositionsPage from "@/pages/service-positions";
 import EventsPage from "@/pages/events";
 import NewsletterPage from "@/pages/newsletter";
 import AdminPage from "@/pages/admin";
+import AreaMeetingsPage from "@/pages/area-meetings";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/meetings" component={MeetingsPage} />
+      <Route path="/area-meetings" component={AreaMeetingsPage} />
       <Route path="/literature" component={LiteraturePage} />
       <Route path="/service-positions" component={ServicePositionsPage} />
       <Route path="/events" component={EventsPage} />
