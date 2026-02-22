@@ -4,6 +4,8 @@
 A comprehensive Narcotics Anonymous group website for the "Another Chance" group. Members can check meeting schedules, browse NA literature, learn about service positions (trusted servant roles), view upcoming events, and subscribe to a newsletter for group updates.
 
 ## Recent Changes
+- **2026-02-22**: Added Fort Worth Area Meetings calendar page (`/area-meetings`) with all 23 area NA groups, addresses (Google Maps links), weekly schedules, search/filter, meeting legend, and resources section. Data sourced from Fort Worth Area Meeting Directory PDF.
+- **2026-02-22**: Mobile responsiveness improvements - sidebar auto-close on nav, responsive padding/headings, horizontal scroll filters.
 - **2026-02-22**: Initial MVP built with all core features - meetings, literature, service positions, events, newsletter subscription, and admin dashboard.
 
 ## Project Architecture
@@ -15,6 +17,7 @@ A comprehensive Narcotics Anonymous group website for the "Another Chance" group
 ### Key Pages
 - `/` - Home page with hero, quick links, and helpline info
 - `/meetings` - Weekly meeting schedule grouped by day
+- `/area-meetings` - Fort Worth area meeting calendar with 23 groups, addresses, and weekly schedules (static data from PDF)
 - `/literature` - NA literature library with category filtering
 - `/service-positions` - All trusted servant positions with requirements, clean time, and responsibilities
 - `/events` - Upcoming and past events calendar
