@@ -33,6 +33,9 @@ import {
   Send,
   Users,
   Trash2,
+  LogIn,
+  LogOut,
+  Lock,
 } from "lucide-react";
 import type { Meeting, Event, Literature, Newsletter, NewsletterSubscriber } from "@shared/schema";
 
@@ -514,14 +517,122 @@ function AdminNewsletter() {
   );
 }
 
+function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const loginMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/admin/login", { username, password });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] });
+      onSuccess();
+    },
+    onError: () => setError("Invalid username or password"),
+  });
+
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+          <div className="mx-auto flex items-center justify-center w-12 h-12 rounded-full bg-muted mb-2">
+            <Lock className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <CardTitle>Admin Login</CardTitle>
+          <p className="text-sm text-muted-foreground">Sign in to access the admin dashboard</p>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setError("");
+              loginMutation.mutate();
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                data-testid="input-admin-username"
+                autoComplete="username"
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                data-testid="input-admin-password"
+                autoComplete="current-password"
+              />
+            </div>
+            {error && <p className="text-sm text-destructive" data-testid="text-login-error">{error}</p>}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loginMutation.isPending || !username || !password}
+              data-testid="button-admin-login"
+            >
+              {loginMutation.isPending ? "Signing in..." : <><LogIn className="w-4 h-4 mr-2" /> Sign In</>}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function AdminPage() {
+  const { data: auth, isLoading } = useQuery<{ isAdmin: boolean }>({
+    queryKey: ["/api/admin/me"],
+  });
+  const { toast } = useToast();
+
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/admin/logout");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] });
+      toast({ title: "Logged out" });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <div className="p-6 max-w-5xl mx-auto">
+        <Skeleton className="h-8 w-48 mb-4" />
+        <Skeleton className="h-64" />
+      </div>
+    );
+  }
+
+  if (!auth?.isAdmin) {
+    return (
+      <div className="p-6 max-w-5xl mx-auto">
+        <AdminLogin onSuccess={() => queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] })} />
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-        <p className="text-muted-foreground">
-          Manage meetings, events, literature, and newsletter communications.
-        </p>
+      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-muted-foreground">
+            Manage meetings, events, literature, and newsletter communications.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => logoutMutation.mutate()} data-testid="button-admin-logout">
+          <LogOut className="w-4 h-4 mr-1" /> Log Out
+        </Button>
       </div>
 
       <Tabs defaultValue="meetings">

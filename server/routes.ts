@@ -1,12 +1,61 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
+import session from "express-session";
 import { storage } from "./storage";
 import { insertMeetingSchema, insertEventSchema, insertLiteratureSchema, insertNewsletterSubscriberSchema } from "@shared/schema";
+
+declare module "express-session" {
+  interface SessionData {
+    isAdmin: boolean;
+  }
+}
+
+const ADMIN_USERNAME = "admin";
+const ADMIN_PASSWORD = "password1";
+
+function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  if (req.session?.isAdmin) {
+    return next();
+  }
+  res.status(401).json({ message: "Unauthorized" });
+}
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || "fallback-secret-key",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: "lax",
+      },
+    })
+  );
+
+  app.post("/api/admin/login", (req, res) => {
+    const { username, password } = req.body;
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      req.session.isAdmin = true;
+      return res.json({ ok: true });
+    }
+    res.status(401).json({ message: "Invalid credentials" });
+  });
+
+  app.post("/api/admin/logout", (req, res) => {
+    req.session.destroy(() => {
+      res.json({ ok: true });
+    });
+  });
+
+  app.get("/api/admin/me", (req, res) => {
+    res.json({ isAdmin: !!req.session?.isAdmin });
+  });
 
   app.get("/api/meetings", async (_req, res) => {
     try {
@@ -17,7 +66,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/meetings", async (req, res) => {
+  app.post("/api/meetings", requireAdmin, async (req, res) => {
     try {
       const parsed = insertMeetingSchema.parse(req.body);
       const meeting = await storage.createMeeting(parsed);
@@ -27,7 +76,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/meetings/:id", async (req, res) => {
+  app.delete("/api/meetings/:id", requireAdmin, async (req, res) => {
     try {
       await storage.deleteMeeting(parseInt(req.params.id));
       res.status(204).send();
@@ -45,7 +94,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/events", async (req, res) => {
+  app.post("/api/events", requireAdmin, async (req, res) => {
     try {
       const parsed = insertEventSchema.parse(req.body);
       const event = await storage.createEvent(parsed);
@@ -55,7 +104,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/events/:id", async (req, res) => {
+  app.delete("/api/events/:id", requireAdmin, async (req, res) => {
     try {
       await storage.deleteEvent(parseInt(req.params.id));
       res.status(204).send();
@@ -73,7 +122,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/literature", async (req, res) => {
+  app.post("/api/literature", requireAdmin, async (req, res) => {
     try {
       const parsed = insertLiteratureSchema.parse(req.body);
       const item = await storage.createLiterature(parsed);
@@ -83,7 +132,7 @@ export async function registerRoutes(
     }
   });
 
-  app.delete("/api/literature/:id", async (req, res) => {
+  app.delete("/api/literature/:id", requireAdmin, async (req, res) => {
     try {
       await storage.deleteLiterature(parseInt(req.params.id));
       res.status(204).send();
@@ -115,7 +164,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/newsletter/subscribers", async (_req, res) => {
+  app.get("/api/newsletter/subscribers", requireAdmin, async (_req, res) => {
     try {
       const subscribers = await storage.getSubscribers();
       res.json(subscribers);
@@ -124,7 +173,7 @@ export async function registerRoutes(
     }
   });
 
-  app.get("/api/newsletters", async (_req, res) => {
+  app.get("/api/newsletters", requireAdmin, async (_req, res) => {
     try {
       const items = await storage.getNewsletters();
       res.json(items);
@@ -133,7 +182,7 @@ export async function registerRoutes(
     }
   });
 
-  app.post("/api/newsletters/send", async (req, res) => {
+  app.post("/api/newsletters/send", requireAdmin, async (req, res) => {
     try {
       const { subject, content } = req.body;
       if (!subject || !content) {
