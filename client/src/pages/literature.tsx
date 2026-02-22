@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { BookOpen, ExternalLink, FileText } from "lucide-react";
+import { BookOpen, ExternalLink, FileText, Download } from "lucide-react";
 import { useState } from "react";
 import type { Literature } from "@shared/schema";
 
@@ -26,8 +26,17 @@ function LiteratureCard({ item }: { item: Literature }) {
             data-testid={`link-literature-${item.id}`}
           >
             <Button variant="outline" size="sm">
-              <ExternalLink className="w-3 h-3 mr-2" />
-              Read More
+              {item.externalUrl.endsWith('.pdf') ? (
+                <>
+                  <FileText className="w-3 h-3 mr-2" />
+                  View PDF
+                </>
+              ) : (
+                <>
+                  <ExternalLink className="w-3 h-3 mr-2" />
+                  Read More
+                </>
+              )}
             </Button>
           </a>
         )}
