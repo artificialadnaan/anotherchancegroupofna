@@ -11,9 +11,9 @@ function LiteratureCard({ item }: { item: Literature }) {
   return (
     <Card className="hover-elevate" data-testid={`card-literature-${item.id}`}>
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
           <CardTitle className="text-base">{item.title}</CardTitle>
-          <Badge variant="outline">{item.category}</Badge>
+          <Badge variant="outline" className="shrink-0 w-fit">{item.category}</Badge>
         </div>
       </CardHeader>
       <CardContent>
@@ -62,19 +62,20 @@ export default function LiteraturePage() {
     : items;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">NA Literature</h1>
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">NA Literature</h1>
         <p className="text-muted-foreground">
           Recovery literature is a vital part of the NA program. Explore resources to support your recovery journey.
         </p>
       </div>
 
       {!isLoading && categories.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
           <Button
             variant={selectedCategory === null ? "default" : "outline"}
             size="sm"
+            className="shrink-0"
             onClick={() => setSelectedCategory(null)}
             data-testid="button-filter-all"
           >
@@ -85,6 +86,7 @@ export default function LiteraturePage() {
               key={category}
               variant={selectedCategory === category ? "default" : "outline"}
               size="sm"
+              className="shrink-0"
               onClick={() => setSelectedCategory(category)}
               data-testid={`button-filter-${category.toLowerCase().replace(/\s+/g, "-")}`}
             >

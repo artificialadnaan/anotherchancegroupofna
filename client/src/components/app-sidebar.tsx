@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const publicItems = [
@@ -28,11 +29,18 @@ const adminItems = [
 
 export function AppSidebar() {
   const [location] = useLocation();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <Link href="/" data-testid="link-home-logo">
+        <Link href="/" data-testid="link-home-logo" onClick={handleNavClick}>
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center w-10 h-10 rounded-md bg-primary">
               <span className="text-primary-foreground font-bold text-lg">AC</span>
@@ -56,7 +64,7 @@ export function AppSidebar() {
                     data-active={location === item.url}
                     data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, "-")}`}
                   >
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={handleNavClick}>
                       <item.icon className="w-4 h-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -77,7 +85,7 @@ export function AppSidebar() {
                     data-active={location.startsWith(item.url)}
                     data-testid={`nav-${item.title.toLowerCase().replace(/\s+/g, "-")}`}
                   >
-                    <Link href={item.url}>
+                    <Link href={item.url} onClick={handleNavClick}>
                       <item.icon className="w-4 h-4" />
                       <span>{item.title}</span>
                     </Link>

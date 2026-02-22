@@ -34,7 +34,7 @@ function EventCard({ event }: { event: Event }) {
   return (
     <Card className={`hover-elevate ${eventPast ? "opacity-60" : ""}`} data-testid={`card-event-${event.id}`}>
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
           <CardTitle className="text-base">{event.title}</CardTitle>
           <div className="flex gap-1 shrink-0">
             <Badge variant="outline">{typeLabel(event.eventType)}</Badge>
@@ -100,9 +100,9 @@ export default function EventsPage() {
   }) ?? [];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Events</h1>
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Events</h1>
         <p className="text-muted-foreground">
           Stay connected with upcoming group activities, area events, workshops, and celebrations. Recovery is more fun together.
         </p>

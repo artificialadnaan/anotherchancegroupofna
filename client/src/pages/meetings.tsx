@@ -85,9 +85,9 @@ export default function MeetingsPage() {
     : [];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Meeting Schedule</h1>
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Meeting Schedule</h1>
         <p className="text-muted-foreground">
           Find a meeting that fits your schedule. All meetings are held at Another Chance Group unless otherwise noted.
         </p>

@@ -606,7 +606,7 @@ export default function AdminPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-5xl mx-auto">
+      <div className="p-4 sm:p-6 max-w-5xl mx-auto">
         <Skeleton className="h-8 w-48 mb-4" />
         <Skeleton className="h-64" />
       </div>
@@ -615,17 +615,17 @@ export default function AdminPage() {
 
   if (!auth?.isAdmin) {
     return (
-      <div className="p-6 max-w-5xl mx-auto">
+      <div className="p-4 sm:p-6 max-w-5xl mx-auto">
         <AdminLogin onSuccess={() => queryClient.invalidateQueries({ queryKey: ["/api/admin/me"] })} />
       </div>
     );
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-2">Admin Dashboard</h1>
           <p className="text-muted-foreground">
             Manage meetings, events, literature, and newsletter communications.
           </p>
@@ -636,20 +636,22 @@ export default function AdminPage() {
       </div>
 
       <Tabs defaultValue="meetings">
-        <TabsList className="mb-4" data-testid="admin-tabs">
-          <TabsTrigger value="meetings" data-testid="tab-meetings">
-            <Clock className="w-4 h-4 mr-1" /> Meetings
-          </TabsTrigger>
-          <TabsTrigger value="events" data-testid="tab-events">
-            <CalendarDays className="w-4 h-4 mr-1" /> Events
-          </TabsTrigger>
-          <TabsTrigger value="literature" data-testid="tab-literature">
-            <BookOpen className="w-4 h-4 mr-1" /> Literature
-          </TabsTrigger>
-          <TabsTrigger value="newsletter" data-testid="tab-newsletter">
-            <Mail className="w-4 h-4 mr-1" /> Newsletter
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mb-4">
+          <TabsList className="inline-flex w-auto min-w-full sm:min-w-0" data-testid="admin-tabs">
+            <TabsTrigger value="meetings" data-testid="tab-meetings">
+              <Clock className="w-4 h-4 mr-1" /> Meetings
+            </TabsTrigger>
+            <TabsTrigger value="events" data-testid="tab-events">
+              <CalendarDays className="w-4 h-4 mr-1" /> Events
+            </TabsTrigger>
+            <TabsTrigger value="literature" data-testid="tab-literature">
+              <BookOpen className="w-4 h-4 mr-1" /> Literature
+            </TabsTrigger>
+            <TabsTrigger value="newsletter" data-testid="tab-newsletter">
+              <Mail className="w-4 h-4 mr-1" /> Newsletter
+            </TabsTrigger>
+          </TabsList>
+        </div>
         <TabsContent value="meetings">
           <AdminMeetings />
         </TabsContent>

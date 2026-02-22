@@ -56,12 +56,12 @@ const principles = [
 export default function HomePage() {
   return (
     <div className="min-h-full">
-      <section className="relative bg-primary px-6 py-16 md:py-24">
+      <section className="relative bg-primary px-4 sm:px-6 py-12 md:py-24">
         <div className="max-w-4xl mx-auto text-center">
           <Badge variant="secondary" className="mb-4" data-testid="badge-welcome">
             Welcome to Recovery
           </Badge>
-          <h1 className="text-3xl md:text-5xl font-bold text-primary-foreground mb-4 leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold text-primary-foreground mb-4 leading-tight">
             Another Chance Group
           </h1>
           <p className="text-lg md:text-xl text-primary-foreground/80 mb-2">
@@ -87,7 +87,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="px-6 py-12 max-w-6xl mx-auto">
+      <section className="px-4 sm:px-6 py-8 md:py-12 max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {principles.map((principle) => (
             <div key={principle.title} className="text-center p-6">
@@ -126,7 +126,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="px-6 py-12 bg-muted/50">
+      <section className="px-4 sm:px-6 py-8 md:py-12 bg-muted/50">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-2xl font-bold mb-4">Need Help Now?</h2>
           <p className="text-muted-foreground mb-6">

@@ -131,9 +131,9 @@ export default function ServicePositionsPage() {
   const openCount = positions?.filter((p) => !p.isFilled).length ?? 0;
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Service Positions</h1>
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Service Positions</h1>
         <p className="text-muted-foreground mb-4">
           Service is a fundamental part of recovery in Narcotics Anonymous. Trusted servants fulfill essential roles that keep our group running. Explore available positions and learn about the requirements for each.
         </p>
@@ -169,10 +169,11 @@ export default function ServicePositionsPage() {
       </section>
 
       {!isLoading && committees.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
           <Button
             variant={selectedCommittee === null ? "default" : "outline"}
             size="sm"
+            className="shrink-0"
             onClick={() => setSelectedCommittee(null)}
             data-testid="button-filter-all-committees"
           >
@@ -183,6 +184,7 @@ export default function ServicePositionsPage() {
               key={committee}
               variant={selectedCommittee === committee ? "default" : "outline"}
               size="sm"
+              className="shrink-0"
               onClick={() => setSelectedCommittee(committee)}
               data-testid={`button-filter-${committee.toLowerCase().replace(/\s+/g, "-")}`}
             >
