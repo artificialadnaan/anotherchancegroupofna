@@ -1,5 +1,7 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { type Server } from "http";
+import path from "path";
+import express from "express";
 import session from "express-session";
 import { storage } from "./storage";
 import { insertMeetingSchema, insertEventSchema, insertLiteratureSchema, insertNewsletterSubscriberSchema, insertSpeakerSchema, insertBirthdaySignupSchema } from "@shared/schema";
@@ -37,6 +39,8 @@ export async function registerRoutes(
       },
     })
   );
+
+  app.use("/literature", express.static(path.join(process.cwd(), "public/literature")));
 
   app.post("/api/admin/login", (req, res) => {
     const { username, password } = req.body;
