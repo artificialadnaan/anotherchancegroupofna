@@ -66,9 +66,21 @@ export default function LiteraturePage() {
     ? Array.from(new Set(items.map((item) => item.category))).sort()
     : [];
 
+  const sortedItems = items?.slice().sort((a, b) => {
+    const getIpNumber = (title: string): number => {
+      const match = title.match(/IP\s*#(\d+)/);
+      return match ? parseInt(match[1], 10) : 9999;
+    };
+    const catOrder = ["Books", "Daily Readings", "Booklets", "Informational Pamphlets", "Service Material", "Key Tags & Medallions"];
+    const catA = catOrder.indexOf(a.category);
+    const catB = catOrder.indexOf(b.category);
+    if (catA !== catB) return (catA === -1 ? 999 : catA) - (catB === -1 ? 999 : catB);
+    return getIpNumber(a.title) - getIpNumber(b.title);
+  });
+
   const filteredItems = selectedCategory
-    ? items?.filter((item) => item.category === selectedCategory)
-    : items;
+    ? sortedItems?.filter((item) => item.category === selectedCategory)
+    : sortedItems;
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">

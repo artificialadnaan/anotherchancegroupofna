@@ -10,24 +10,22 @@ import HomePage from "@/pages/home";
 import MeetingsPage from "@/pages/meetings";
 import LiteraturePage from "@/pages/literature";
 import ServicePositionsPage from "@/pages/service-positions";
-import EventsPage from "@/pages/events";
-import NewsletterPage from "@/pages/newsletter";
-import AdminPage from "@/pages/admin";
-import AreaMeetingsPage from "@/pages/area-meetings";
 import GroupCalendarPage from "@/pages/group-calendar";
 import BirthdaySignupPage from "@/pages/birthday-signup";
+import DailyReadingsPage from "@/pages/daily-readings";
+import NewsletterPage from "@/pages/newsletter";
+import AdminPage from "@/pages/admin";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/meetings" component={MeetingsPage} />
-      <Route path="/area-meetings" component={AreaMeetingsPage} />
       <Route path="/literature" component={LiteraturePage} />
       <Route path="/service-positions" component={ServicePositionsPage} />
-      <Route path="/events" component={EventsPage} />
-      <Route path="/group-calendar" component={GroupCalendarPage} />
+      <Route path="/calendar" component={GroupCalendarPage} />
       <Route path="/birthday-signup" component={BirthdaySignupPage} />
+      <Route path="/daily-readings" component={DailyReadingsPage} />
       <Route path="/newsletter" component={NewsletterPage} />
       <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />

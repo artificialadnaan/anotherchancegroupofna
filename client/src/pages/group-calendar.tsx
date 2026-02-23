@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CalendarDays, Cake, Mic, Users, Gamepad2, Heart, ChevronLeft, ChevronRight, PartyPopper } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Cake, Mic, Users, Gamepad2, Heart, ChevronLeft, ChevronRight, PartyPopper, CalendarDays, Clock, MapPin } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
-import type { Speaker } from "@shared/schema";
+import type { Speaker, Event as DbEvent } from "@shared/schema";
+import { format, parseISO } from "date-fns";
 
 function getFirstFriday(year: number, month: number): Date {
   const d = new Date(year, month, 1);
@@ -48,31 +49,45 @@ function getMondaysInMonth(year: number, month: number): Date[] {
   return mondays;
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-}
-
-function formatShortDate(date: Date): string {
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function dateKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 interface CalendarEvent {
   date: Date;
   title: string;
   time: string;
-  type: "birthday" | "speaker" | "conscience" | "gamenight" | "women";
-  icon: typeof CalendarDays;
-  description: string;
-  speaker?: Speaker;
+  type: "birthday" | "speaker" | "conscience" | "gamenight" | "women" | "event";
+  description?: string;
 }
+
+const typeColors: Record<string, { bg: string; text: string; dot: string }> = {
+  birthday: { bg: "bg-pink-100 dark:bg-pink-900/30", text: "text-pink-800 dark:text-pink-200", dot: "bg-pink-500" },
+  speaker: { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-800 dark:text-blue-200", dot: "bg-blue-500" },
+  conscience: { bg: "bg-amber-100 dark:bg-amber-900/30", text: "text-amber-800 dark:text-amber-200", dot: "bg-amber-500" },
+  gamenight: { bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-800 dark:text-green-200", dot: "bg-green-500" },
+  women: { bg: "bg-purple-100 dark:bg-purple-900/30", text: "text-purple-800 dark:text-purple-200", dot: "bg-purple-500" },
+  event: { bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-800 dark:text-orange-200", dot: "bg-orange-500" },
+};
+
+const typeLabels: Record<string, string> = {
+  birthday: "Birthday Night",
+  speaker: "Speaker Meeting",
+  conscience: "Group Conscience",
+  gamenight: "Game Night",
+  women: "Women's Meeting",
+  event: "Group/Area Event",
+};
 
 export default function GroupCalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
   const monthName = currentDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   const { data: speakers } = useQuery<Speaker[]>({ queryKey: ["/api/speakers"] });
+  const { data: dbEvents } = useQuery<DbEvent[]>({ queryKey: ["/api/events"] });
 
   const firstFriday = getFirstFriday(year, month);
   const speakerFridays = getEveryOtherFriday(year, month, firstFriday);
@@ -80,188 +95,250 @@ export default function GroupCalendarPage() {
   const lastSaturday = getLastSaturday(year, month);
   const mondays = getMondaysInMonth(year, month);
 
-  const events: CalendarEvent[] = [];
+  const allEvents: CalendarEvent[] = [];
 
-  events.push({
+  allEvents.push({
     date: firstFriday,
     title: "Birthday Night",
     time: "6:00 PM",
     type: "birthday",
-    icon: Cake,
-    description: "Monthly celebration of recovery milestones. Come celebrate with members who are marking clean time anniversaries!",
+    description: "Monthly celebration of recovery milestones",
   });
 
-  const monthKey = `${year}-${String(month + 1).padStart(2, "0")}`;
   speakerFridays.forEach((friday) => {
-    const dateStr = `${friday.getFullYear()}-${String(friday.getMonth() + 1).padStart(2, "0")}-${String(friday.getDate()).padStart(2, "0")}`;
-    const matchingSpeaker = speakers?.find((s) => s.meetingDate === dateStr);
-    events.push({
+    const dk = dateKey(friday);
+    const matchingSpeaker = speakers?.find((s) => s.meetingDate === dk);
+    allEvents.push({
       date: friday,
       title: "Speaker Meeting",
       time: "6:00 PM",
       type: "speaker",
-      icon: Mic,
       description: matchingSpeaker
-        ? `Speaker: ${matchingSpeaker.speakerName}${matchingSpeaker.topic ? ` - "${matchingSpeaker.topic}"` : ""}${matchingSpeaker.isConfirmed ? "" : " (Tentative)"}`
-        : "Speaker to be announced. Check back for updates.",
-      speaker: matchingSpeaker,
+        ? `${matchingSpeaker.speakerName}${matchingSpeaker.topic ? ` - "${matchingSpeaker.topic}"` : ""}${matchingSpeaker.isConfirmed ? "" : " (TBD)"}`
+        : "Speaker TBA",
     });
   });
 
-  events.push({
+  allEvents.push({
     date: lastSunday,
     title: "Group Conscience",
     time: "1:30 PM",
     type: "conscience",
-    icon: Users,
-    description: "Monthly group conscience meeting. All members are encouraged to attend and participate in group decisions.",
   });
 
-  events.push({
+  allEvents.push({
     date: lastSaturday,
     title: "Game Night",
     time: "7:00 PM",
     type: "gamenight",
-    icon: Gamepad2,
-    description: "Join us for an evening of games, fellowship, and clean fun! Bring a snack to share.",
   });
 
   mondays.forEach((monday) => {
-    events.push({
+    allEvents.push({
       date: monday,
       title: "Women's Meeting",
       time: "7:30 PM",
       type: "women",
-      icon: Heart,
-      description: "A safe space for women in recovery to share, support, and grow together.",
     });
   });
 
-  events.sort((a, b) => a.date.getTime() - b.date.getTime());
+  dbEvents?.forEach((evt) => {
+    try {
+      const eventDate = parseISO(evt.eventDate);
+      if (eventDate.getMonth() === month && eventDate.getFullYear() === year) {
+        allEvents.push({
+          date: eventDate,
+          title: evt.title,
+          time: evt.eventTime || "",
+          type: "event",
+          description: evt.description || undefined,
+        });
+      }
+    } catch {}
+  });
 
-  const typeColors: Record<string, string> = {
-    birthday: "bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300",
-    speaker: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-    conscience: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-    gamenight: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-    women: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  };
+  const eventsByDate: Record<string, CalendarEvent[]> = {};
+  allEvents.forEach((e) => {
+    const key = dateKey(e.date);
+    if (!eventsByDate[key]) eventsByDate[key] = [];
+    eventsByDate[key].push(e);
+  });
 
-  const typeLabels: Record<string, string> = {
-    birthday: "Birthday Night",
-    speaker: "Speaker Meeting",
-    conscience: "Group Conscience",
-    gamenight: "Game Night",
-    women: "Women's Meeting",
-  };
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const todayStr = dateKey(new Date());
 
-  const prevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
-  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
-  const today = () => setCurrentDate(new Date());
+  const calendarDays: (number | null)[] = [];
+  for (let i = 0; i < firstDayOfMonth; i++) calendarDays.push(null);
+  for (let d = 1; d <= daysInMonth; d++) calendarDays.push(d);
+  while (calendarDays.length % 7 !== 0) calendarDays.push(null);
+
+  const weeks: (number | null)[][] = [];
+  for (let i = 0; i < calendarDays.length; i += 7) {
+    weeks.push(calendarDays.slice(i, i + 7));
+  }
+
+  const prevMonth = () => { setCurrentDate(new Date(year, month - 1, 1)); setSelectedDate(null); };
+  const nextMonth = () => { setCurrentDate(new Date(year, month + 1, 1)); setSelectedDate(null); };
+  const goToday = () => { setCurrentDate(new Date()); setSelectedDate(null); };
 
   const isCurrentMonth = new Date().getMonth() === month && new Date().getFullYear() === year;
 
+  const selectedEvents = selectedDate ? (eventsByDate[selectedDate] || []) : null;
+
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2" data-testid="text-calendar-heading">Group Calendar</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2" data-testid="text-calendar-heading">Calendar</h1>
         <p className="text-muted-foreground">
-          Recurring events and special meetings for the Another Chance Group.
+          Group events, special meetings, and activities for the Another Chance Group.
         </p>
       </div>
 
-      <div className="flex items-center justify-between mb-6 gap-2">
-        <Button variant="outline" size="icon" onClick={prevMonth} data-testid="button-prev-month">
-          <ChevronLeft className="w-4 h-4" />
-        </Button>
-        <div className="text-center">
-          <h2 className="text-xl font-semibold" data-testid="text-current-month">{monthName}</h2>
+      <div className="flex items-center justify-between mb-4 gap-2">
+        <div className="flex items-center gap-2">
           {!isCurrentMonth && (
-            <Button variant="ghost" size="sm" onClick={today} className="text-xs p-0 h-auto" data-testid="button-today">
-              Back to Today
+            <Button variant="outline" size="sm" onClick={goToday} data-testid="button-today">
+              Today
             </Button>
           )}
+          <Button variant="ghost" size="icon" onClick={prevMonth} data-testid="button-prev-month">
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={nextMonth} data-testid="button-next-month">
+            <ChevronRight className="w-5 h-5" />
+          </Button>
         </div>
-        <Button variant="outline" size="icon" onClick={nextMonth} data-testid="button-next-month">
-          <ChevronRight className="w-4 h-4" />
-        </Button>
+        <h2 className="text-lg sm:text-xl font-semibold" data-testid="text-current-month">{monthName}</h2>
       </div>
 
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
         {Object.entries(typeLabels).map(([key, label]) => (
-          <Badge key={key} className={`${typeColors[key]} shrink-0 text-xs`} data-testid={`badge-legend-${key}`}>
-            {label}
-          </Badge>
+          <div key={key} className="flex items-center gap-1.5 shrink-0">
+            <span className={`w-2.5 h-2.5 rounded-full ${typeColors[key].dot}`} />
+            <span className="text-xs text-muted-foreground">{label}</span>
+          </div>
         ))}
       </div>
 
-      <div className="space-y-3 mb-8">
-        {events.map((event, idx) => {
-          const isToday = event.date.toDateString() === new Date().toDateString();
-          const isPast = event.date < new Date() && !isToday;
-          return (
-            <Card
-              key={idx}
-              className={`transition-all ${isPast ? "opacity-60" : ""} ${isToday ? "ring-2 ring-primary" : ""}`}
-              data-testid={`card-event-${event.type}-${idx}`}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-4">
-                  <div className="flex flex-col items-center text-center min-w-[60px]">
-                    <span className="text-xs text-muted-foreground uppercase">
-                      {event.date.toLocaleDateString("en-US", { weekday: "short" })}
-                    </span>
-                    <span className="text-2xl font-bold">{event.date.getDate()}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {event.date.toLocaleDateString("en-US", { month: "short" })}
+      <div className="border rounded-lg overflow-hidden mb-6" data-testid="calendar-grid">
+        <div className="grid grid-cols-7 bg-muted/50">
+          {["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"].map((day) => (
+            <div key={day} className="p-2 text-center text-xs font-medium text-muted-foreground border-b">
+              <span className="hidden sm:inline">{day}</span>
+              <span className="sm:hidden">{day.charAt(0)}</span>
+            </div>
+          ))}
+        </div>
+        {weeks.map((week, wi) => (
+          <div key={wi} className="grid grid-cols-7 border-b last:border-b-0">
+            {week.map((day, di) => {
+              if (day === null) {
+                return <div key={di} className="min-h-[80px] sm:min-h-[100px] border-r last:border-r-0 bg-muted/20" />;
+              }
+              const dk = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+              const dayEvents = eventsByDate[dk] || [];
+              const isToday = dk === todayStr;
+              const isSelected = dk === selectedDate;
+              return (
+                <div
+                  key={di}
+                  className={`min-h-[80px] sm:min-h-[100px] border-r last:border-r-0 p-1 cursor-pointer transition-colors hover:bg-muted/30 ${isSelected ? "bg-primary/5 ring-1 ring-primary/30" : ""}`}
+                  onClick={() => setSelectedDate(dk === selectedDate ? null : dk)}
+                  data-testid={`calendar-day-${dk}`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className={`text-xs sm:text-sm font-medium ${isToday ? "bg-primary text-primary-foreground rounded-full w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center" : "text-foreground pl-1"}`}>
+                      {day}
                     </span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <event.icon className="w-4 h-4 shrink-0" />
-                      <h3 className="font-semibold text-sm">{event.title}</h3>
-                      <Badge className={`${typeColors[event.type]} text-xs`}>{event.time}</Badge>
-                      {isToday && <Badge variant="default" className="text-xs">Today</Badge>}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{event.description}</p>
-                    {event.type === "birthday" && (
-                      <Link href="/birthday-signup">
-                        <Button variant="outline" size="sm" className="mt-2" data-testid="button-birthday-signup">
-                          <PartyPopper className="w-3 h-3 mr-2" />
-                          Sign Up to Celebrate
-                        </Button>
-                      </Link>
+                  <div className="space-y-0.5">
+                    {dayEvents.slice(0, 3).map((evt, ei) => (
+                      <div
+                        key={ei}
+                        className={`text-[10px] sm:text-xs px-1 py-0.5 rounded truncate ${typeColors[evt.type].bg} ${typeColors[evt.type].text}`}
+                        title={`${evt.title} ${evt.time}`}
+                        data-testid={`event-pill-${evt.type}-${dk}`}
+                      >
+                        <span className="hidden sm:inline">{evt.title}</span>
+                        <span className="sm:hidden">{evt.title.split(" ")[0]}</span>
+                      </div>
+                    ))}
+                    {dayEvents.length > 3 && (
+                      <div className="text-[10px] text-muted-foreground pl-1">+{dayEvents.length - 3} more</div>
                     )}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              );
+            })}
+          </div>
+        ))}
       </div>
 
-      <section className="p-6 bg-muted/50 rounded-md">
-        <h2 className="text-xl font-semibold mb-3">Recurring Schedule</h2>
-        <div className="space-y-2 text-sm text-muted-foreground">
+      {selectedEvents !== null && (
+        <Card className="mb-6" data-testid="selected-day-detail">
+          <CardContent className="p-4">
+            <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <CalendarDays className="w-4 h-4" />
+              {new Date(selectedDate! + "T12:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+            </h3>
+            {selectedEvents.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No events on this day.</p>
+            ) : (
+              <div className="space-y-3">
+                {selectedEvents.map((evt, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className={`w-3 h-3 rounded-full mt-1 shrink-0 ${typeColors[evt.type].dot}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium">{evt.title}</span>
+                        {evt.time && <span className="text-xs text-muted-foreground">{evt.time}</span>}
+                      </div>
+                      {evt.description && (
+                        <p className="text-xs text-muted-foreground mt-0.5">{evt.description}</p>
+                      )}
+                      {evt.type === "birthday" && (
+                        <Link href="/birthday-signup">
+                          <Button variant="outline" size="sm" className="mt-1.5 h-7 text-xs" data-testid="button-birthday-signup">
+                            <PartyPopper className="w-3 h-3 mr-1" /> Sign Up to Celebrate
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      <section className="p-4 sm:p-6 bg-muted/50 rounded-md">
+        <h2 className="text-lg font-semibold mb-3">Recurring Schedule</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
-            <Cake className="w-4 h-4 shrink-0" />
-            <span><strong>Birthday Night</strong> - 1st Friday of every month at 6:00 PM</span>
+            <span className={`w-2.5 h-2.5 rounded-full ${typeColors.birthday.dot} shrink-0`} />
+            <span><strong>Birthday Night</strong> - 1st Friday, 6 PM</span>
           </div>
           <div className="flex items-center gap-2">
-            <Mic className="w-4 h-4 shrink-0" />
-            <span><strong>Speaker Meeting</strong> - Every other Friday at 6:00 PM</span>
+            <span className={`w-2.5 h-2.5 rounded-full ${typeColors.speaker.dot} shrink-0`} />
+            <span><strong>Speaker Meeting</strong> - Every other Friday, 6 PM</span>
           </div>
           <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 shrink-0" />
-            <span><strong>Group Conscience</strong> - Last Sunday of every month at 1:30 PM</span>
+            <span className={`w-2.5 h-2.5 rounded-full ${typeColors.conscience.dot} shrink-0`} />
+            <span><strong>Group Conscience</strong> - Last Sunday, 1:30 PM</span>
           </div>
           <div className="flex items-center gap-2">
-            <Gamepad2 className="w-4 h-4 shrink-0" />
-            <span><strong>Game Night</strong> - Last Saturday of every month at 7:00 PM</span>
+            <span className={`w-2.5 h-2.5 rounded-full ${typeColors.gamenight.dot} shrink-0`} />
+            <span><strong>Game Night</strong> - Last Saturday, 7 PM</span>
           </div>
           <div className="flex items-center gap-2">
-            <Heart className="w-4 h-4 shrink-0" />
-            <span><strong>Women's Meeting</strong> - Every Monday at 7:30 PM</span>
+            <span className={`w-2.5 h-2.5 rounded-full ${typeColors.women.dot} shrink-0`} />
+            <span><strong>Women's Meeting</strong> - Every Monday, 7:30 PM</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`w-2.5 h-2.5 rounded-full ${typeColors.event.dot} shrink-0`} />
+            <span><strong>Group/Area Events</strong> - As scheduled</span>
           </div>
         </div>
       </section>

@@ -27,11 +27,11 @@ const quickLinks = [
     label: "View Positions",
   },
   {
-    title: "Upcoming Events",
-    description: "Stay connected with group activities, workshops, and celebrations.",
+    title: "Calendar",
+    description: "Stay connected with group activities, meetings, and celebrations.",
     icon: CalendarDays,
-    href: "/events",
-    label: "See Events",
+    href: "/calendar",
+    label: "View Calendar",
   },
 ];
 

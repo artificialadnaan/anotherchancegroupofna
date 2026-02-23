@@ -11,16 +11,16 @@ import { Cake, PartyPopper, CalendarDays } from "lucide-react";
 import { useState } from "react";
 import type { BirthdaySignup } from "@shared/schema";
 
+function getFirstFriday(year: number, month: number): Date {
+  const d = new Date(year, month, 1);
+  while (d.getDay() !== 5) d.setDate(d.getDate() + 1);
+  return d;
+}
+
 function getNextBirthdayNight(): Date {
   const now = new Date();
   let year = now.getFullYear();
   let month = now.getMonth();
-
-  const getFirstFriday = (y: number, m: number) => {
-    const d = new Date(y, m, 1);
-    while (d.getDay() !== 5) d.setDate(d.getDate() + 1);
-    return d;
-  };
 
   let firstFriday = getFirstFriday(year, month);
   if (firstFriday <= now) {
@@ -29,6 +29,13 @@ function getNextBirthdayNight(): Date {
     firstFriday = getFirstFriday(year, month);
   }
   return firstFriday;
+}
+
+function getCelebrationMonthForBirthdayNight(birthdayNight: Date): string {
+  let m = birthdayNight.getMonth() - 1;
+  let y = birthdayNight.getFullYear();
+  if (m < 0) { m = 11; y--; }
+  return `${y}-${String(m + 1).padStart(2, "0")}`;
 }
 
 function getCleanTimeDisplay(cleanDateStr: string): string {
@@ -52,7 +59,12 @@ function getCleanTimeDisplay(cleanDateStr: string): string {
 export default function BirthdaySignupPage() {
   const { toast } = useToast();
   const nextBirthday = getNextBirthdayNight();
-  const celebrationMonth = `${nextBirthday.getFullYear()}-${String(nextBirthday.getMonth() + 1).padStart(2, "0")}`;
+  const celebrationMonth = getCelebrationMonthForBirthdayNight(nextBirthday);
+
+  const celebrationMonthLabel = new Date(
+    parseInt(celebrationMonth.split("-")[0]),
+    parseInt(celebrationMonth.split("-")[1]) - 1
+  ).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   const [name, setName] = useState("");
   const [cleanDate, setCleanDate] = useState("");
@@ -104,6 +116,11 @@ export default function BirthdaySignupPage() {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="bg-muted/50 rounded-md p-3 mb-4 text-sm text-muted-foreground">
+            <p>
+              This Birthday Night celebrates members whose clean time milestone falls in <strong>{celebrationMonthLabel}</strong>. If your clean date anniversary is in {celebrationMonthLabel}, sign up below!
+            </p>
+          </div>
           <div className="space-y-4">
             <div>
               <Label htmlFor="name">Your Name</Label>
@@ -143,7 +160,7 @@ export default function BirthdaySignupPage() {
 
       <div>
         <h2 className="text-lg font-semibold mb-4" data-testid="text-celebrating-heading">
-          Celebrating This Month ({currentMonthSignups.length})
+          Celebrating {celebrationMonthLabel} Milestones ({currentMonthSignups.length})
         </h2>
         {isLoading && <Skeleton className="h-32" />}
         {currentMonthSignups.length === 0 && !isLoading && (
@@ -151,7 +168,7 @@ export default function BirthdaySignupPage() {
             <Cake className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="font-semibold mb-2">No Sign-Ups Yet</h3>
             <p className="text-sm text-muted-foreground">
-              Be the first to sign up for this month's Birthday Night celebration!
+              Be the first to sign up for this Birthday Night celebration!
             </p>
           </Card>
         )}
@@ -184,9 +201,10 @@ export default function BirthdaySignupPage() {
       <section className="mt-12 p-6 bg-muted/50 rounded-md">
         <h2 className="text-xl font-semibold mb-3">About Birthday Night</h2>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Birthday Night is held on the first Friday of every month at 6:00 PM. It's a special time when we come
-          together to celebrate members' recovery milestones. Whether you're celebrating 30 days or 30 years,
-          your clean time matters and we want to celebrate with you! Sign up above so we can prepare for your celebration.
+          Birthday Night is held on the first Friday of every month at 6:00 PM. Members who celebrated a clean time
+          milestone during the previous month are recognized and celebrated. For example, if your clean date anniversary
+          falls in February, you would celebrate at the first Friday of March Birthday Night. Sign up above so we can
+          prepare for your celebration!
         </p>
       </section>
     </div>
