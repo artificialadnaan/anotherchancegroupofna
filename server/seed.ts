@@ -1,9 +1,104 @@
-import { db } from "./db";
+import { db, pool } from "./db";
 import { meetings, events, literature, servicePositions } from "@shared/schema";
 import { sql } from "drizzle-orm";
 
+async function createTables() {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS meetings (
+        id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        name TEXT NOT NULL,
+        day_of_week TEXT NOT NULL,
+        start_time TEXT NOT NULL,
+        end_time TEXT NOT NULL,
+        meeting_type TEXT NOT NULL,
+        format TEXT,
+        location TEXT NOT NULL,
+        description TEXT,
+        is_active BOOLEAN NOT NULL DEFAULT true
+      );
+      CREATE TABLE IF NOT EXISTS events (
+        id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        event_date TEXT NOT NULL,
+        event_time TEXT,
+        end_time TEXT,
+        location TEXT NOT NULL,
+        event_type TEXT NOT NULL,
+        is_active BOOLEAN NOT NULL DEFAULT true
+      );
+      CREATE TABLE IF NOT EXISTS literature (
+        id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        category TEXT NOT NULL,
+        external_url TEXT,
+        is_active BOOLEAN NOT NULL DEFAULT true
+      );
+      CREATE TABLE IF NOT EXISTS service_positions (
+        id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        title TEXT NOT NULL,
+        committee TEXT NOT NULL,
+        clean_time_requirement TEXT NOT NULL,
+        commitment_length TEXT NOT NULL,
+        description TEXT,
+        responsibilities TEXT[] NOT NULL,
+        additional_notes TEXT,
+        filled_by TEXT,
+        is_filled BOOLEAN NOT NULL DEFAULT false,
+        is_active BOOLEAN NOT NULL DEFAULT true
+      );
+      CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+        id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        email TEXT NOT NULL UNIQUE,
+        name TEXT,
+        is_active BOOLEAN NOT NULL DEFAULT true,
+        subscribed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS newsletters (
+        id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        subject TEXT NOT NULL,
+        content TEXT NOT NULL,
+        sent_at TIMESTAMPTZ,
+        recipient_count INTEGER DEFAULT 0,
+        status TEXT NOT NULL DEFAULT 'draft'
+      );
+      CREATE TABLE IF NOT EXISTS speakers (
+        id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        speaker_name TEXT NOT NULL,
+        meeting_date TEXT NOT NULL,
+        topic TEXT,
+        is_confirmed BOOLEAN NOT NULL DEFAULT false
+      );
+      CREATE TABLE IF NOT EXISTS birthday_signups (
+        id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        name TEXT NOT NULL,
+        clean_date TEXT NOT NULL,
+        celebration_month TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      -- Add filled_by column if it doesn't exist (migration)
+      DO $$ BEGIN
+        ALTER TABLE service_positions ADD COLUMN IF NOT EXISTS filled_by TEXT;
+      EXCEPTION WHEN duplicate_column THEN NULL;
+      END $$;
+    `);
+    console.log("Tables created/verified successfully");
+  } finally {
+    client.release();
+  }
+}
+
 export async function seedDatabase() {
-  // Check if we need to reseed (v2 adds filledBy column and correct meeting schedule)
+  await createTables();
+
   const existingMeetings = await db.select().from(meetings);
   const needsReseed = existingMeetings.length > 0 && existingMeetings.length !== 17;
   if (needsReseed) {
