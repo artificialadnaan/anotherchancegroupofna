@@ -3,8 +3,16 @@ import { meetings, events, literature, servicePositions } from "@shared/schema";
 import { sql } from "drizzle-orm";
 
 export async function seedDatabase() {
+  // Check if we need to reseed (v2 adds filledBy column and correct meeting schedule)
   const existingMeetings = await db.select().from(meetings);
-  if (existingMeetings.length > 0) return;
+  const needsReseed = existingMeetings.length > 0 && existingMeetings.length !== 17;
+  if (needsReseed) {
+    console.log("Reseeding database with updated data...");
+    await db.delete(meetings);
+    await db.delete(servicePositions);
+  } else if (existingMeetings.length > 0) {
+    return;
+  }
 
   await db.insert(meetings).values([
     // Sunday
