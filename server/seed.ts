@@ -7,16 +7,30 @@ export async function seedDatabase() {
   if (existingMeetings.length > 0) return;
 
   await db.insert(meetings).values([
-    { name: "Morning Meditation", dayOfWeek: "Monday", startTime: "7:00 AM", endTime: "8:00 AM", meetingType: "Open", format: "Meditation & Sharing", location: "Another Chance Group", description: "Start your week with a guided meditation and open sharing." },
-    { name: "Step Study", dayOfWeek: "Monday", startTime: "7:00 PM", endTime: "8:30 PM", meetingType: "Closed", format: "Step Study", location: "Another Chance Group", description: "In-depth study of the 12 Steps of NA." },
-    { name: "Open Discussion", dayOfWeek: "Tuesday", startTime: "7:00 PM", endTime: "8:30 PM", meetingType: "Open", format: "Topic Discussion", location: "Another Chance Group", description: "Open topic discussion meeting. All are welcome." },
-    { name: "Literature Study", dayOfWeek: "Wednesday", startTime: "7:00 PM", endTime: "8:30 PM", meetingType: "Closed", format: "Literature Study", location: "Another Chance Group", description: "Reading and discussing NA literature together." },
-    { name: "Traditions Workshop", dayOfWeek: "Thursday", startTime: "6:30 PM", endTime: "7:30 PM", meetingType: "Open", format: "Workshop", location: "Another Chance Group", description: "Study and discuss the 12 Traditions of NA." },
-    { name: "Living Clean", dayOfWeek: "Thursday", startTime: "8:00 PM", endTime: "9:00 PM", meetingType: "Closed", format: "Topic Discussion", location: "Another Chance Group", description: "Discussion focused on living clean in everyday life." },
-    { name: "Speaker Meeting", dayOfWeek: "Friday", startTime: "8:00 PM", endTime: "9:30 PM", meetingType: "Speaker", format: "Speaker", location: "Another Chance Group", description: "Guest speaker shares their experience, strength, and hope." },
-    { name: "Just for Today", dayOfWeek: "Saturday", startTime: "10:00 AM", endTime: "11:00 AM", meetingType: "Open", format: "Daily Reading", location: "Another Chance Group", description: "Reading from 'Just for Today' followed by open sharing." },
-    { name: "Candlelight Meeting", dayOfWeek: "Saturday", startTime: "8:00 PM", endTime: "9:30 PM", meetingType: "Open", format: "Candlelight", location: "Another Chance Group", description: "A reflective candlelight meeting with open sharing." },
-    { name: "Gratitude Meeting", dayOfWeek: "Sunday", startTime: "6:00 PM", endTime: "7:30 PM", meetingType: "Open", format: "Gratitude Sharing", location: "Another Chance Group", description: "End the week with gratitude sharing and fellowship." },
+    // Sunday
+    { name: "Morning Meeting", dayOfWeek: "Sunday", startTime: "10:00 AM", endTime: "11:00 AM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053", description: "Start your Sunday with open sharing and fellowship." },
+    { name: "Evening Meeting", dayOfWeek: "Sunday", startTime: "6:00 PM", endTime: "7:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    // Monday
+    { name: "Noon Meeting", dayOfWeek: "Monday", startTime: "12:00 PM", endTime: "1:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    { name: "Evening Meeting", dayOfWeek: "Monday", startTime: "6:00 PM", endTime: "7:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    { name: "Women's Meeting", dayOfWeek: "Monday", startTime: "7:30 PM", endTime: "8:30 PM", meetingType: "Open", format: "Women's Literature Study", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053", description: "Closed meeting for women in recovery." },
+    // Tuesday
+    { name: "Noon Meeting", dayOfWeek: "Tuesday", startTime: "12:00 PM", endTime: "1:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    { name: "Evening Meeting", dayOfWeek: "Tuesday", startTime: "6:00 PM", endTime: "7:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    // Wednesday
+    { name: "Noon Meeting", dayOfWeek: "Wednesday", startTime: "12:00 PM", endTime: "1:00 PM", meetingType: "Open", format: "Literature Study", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    { name: "Evening Meeting", dayOfWeek: "Wednesday", startTime: "6:00 PM", endTime: "7:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    { name: "Literature Study", dayOfWeek: "Wednesday", startTime: "8:00 PM", endTime: "9:00 PM", meetingType: "Open", format: "Literature Study", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053", description: "Reading and discussing NA literature together." },
+    // Thursday
+    { name: "Noon Meeting", dayOfWeek: "Thursday", startTime: "12:00 PM", endTime: "1:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    { name: "Evening Meeting", dayOfWeek: "Thursday", startTime: "6:00 PM", endTime: "7:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    // Friday
+    { name: "Noon Meeting", dayOfWeek: "Friday", startTime: "12:00 PM", endTime: "1:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    { name: "Evening Meeting", dayOfWeek: "Friday", startTime: "6:00 PM", endTime: "7:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    // Saturday
+    { name: "Morning Meeting", dayOfWeek: "Saturday", startTime: "10:00 AM", endTime: "11:00 AM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    { name: "Noon Meeting", dayOfWeek: "Saturday", startTime: "12:00 PM", endTime: "1:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
+    { name: "Evening Meeting", dayOfWeek: "Saturday", startTime: "6:00 PM", endTime: "7:00 PM", meetingType: "Open", format: "Open Discussion", location: "Another Chance Group - 732 Brown Trail, Hurst, TX 76053" },
   ]);
 
   await db.insert(events).values([

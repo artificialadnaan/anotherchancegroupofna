@@ -155,6 +155,16 @@ export async function registerRoutes(
     }
   });
 
+  app.patch("/api/service-positions/:id", requireAdmin, async (req, res) => {
+    try {
+      const { filledBy, isFilled } = req.body;
+      const updated = await storage.updateServicePosition(parseInt(req.params.id as string), { filledBy, isFilled });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update service position" });
+    }
+  });
+
   app.post("/api/newsletter/subscribe", async (req, res) => {
     try {
       const parsed = insertNewsletterSubscriberSchema.parse(req.body);

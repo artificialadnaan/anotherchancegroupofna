@@ -52,6 +52,7 @@ export const servicePositions = pgTable("service_positions", {
   description: text("description"),
   responsibilities: text("responsibilities").array().notNull(),
   additionalNotes: text("additional_notes"),
+  filledBy: text("filled_by"),
   isFilled: boolean("is_filled").notNull().default(false),
   isActive: boolean("is_active").notNull().default(true),
 });

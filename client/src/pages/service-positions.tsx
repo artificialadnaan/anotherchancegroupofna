@@ -30,7 +30,7 @@ function PositionCard({ position }: { position: ServicePosition }) {
               {position.isFilled ? (
                 <Badge className="text-xs bg-[var(--md3-secondary-container)] text-[var(--md3-on-secondary-container)] hover:bg-[var(--md3-secondary-container)]/80 border-0">
                   <CheckCircle2 className="w-3 h-3 mr-1" />
-                  Filled
+                  {position.filledBy || "Filled"}
                 </Badge>
               ) : (
                 <Badge className="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 hover:bg-emerald-100/80 border-0">

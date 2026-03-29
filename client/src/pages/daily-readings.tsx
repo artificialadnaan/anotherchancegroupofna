@@ -55,7 +55,7 @@ export default function DailyReadingsPage() {
             <p className="text-sm text-[var(--md3-outline)] mb-4 leading-relaxed">
               "A Spiritual Principle a Day" explores the spiritual principles found in NA's Twelve Steps, Twelve Traditions, and Twelve Concepts. A daily reading to deepen your understanding of recovery.
             </p>
-            <a href="https://www.spadna.org/spad/" target="_blank" rel="noopener noreferrer" data-testid="link-spad" className="text-[var(--md3-secondary)]">
+            <a href="https://spadna.org" target="_blank" rel="noopener noreferrer" data-testid="link-spad" className="text-[var(--md3-secondary)]">
               <Button className="w-full">
                 <BookOpen className="w-4 h-4 mr-2" />
                 Read Today's SPAD

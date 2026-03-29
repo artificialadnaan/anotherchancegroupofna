@@ -37,6 +37,7 @@ export interface IStorage {
   getServicePositions(): Promise<ServicePosition[]>;
   getServicePosition(id: number): Promise<ServicePosition | undefined>;
   createServicePosition(position: InsertServicePosition): Promise<ServicePosition>;
+  updateServicePosition(id: number, data: Partial<ServicePosition>): Promise<ServicePosition>;
   deleteServicePosition(id: number): Promise<void>;
 
   getSubscribers(): Promise<NewsletterSubscriber[]>;
@@ -139,6 +140,11 @@ export class DatabaseStorage implements IStorage {
   async createServicePosition(position: InsertServicePosition): Promise<ServicePosition> {
     const [created] = await db.insert(servicePositions).values(position).returning();
     return created;
+  }
+
+  async updateServicePosition(id: number, data: Partial<ServicePosition>): Promise<ServicePosition> {
+    const [updated] = await db.update(servicePositions).set(data).where(eq(servicePositions.id, id)).returning();
+    return updated;
   }
 
   async deleteServicePosition(id: number): Promise<void> {
