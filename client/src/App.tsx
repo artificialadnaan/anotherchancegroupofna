@@ -78,7 +78,7 @@ function DrawerMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   if (!open) return null;
 
   return (
-    <>
+    <div onKeyDown={(e) => { if (e.key === "Escape") onClose(); }}>
       <div
         className="fixed inset-0 bg-black/40 z-[60] backdrop-blur-sm"
         onClick={onClose}
@@ -127,7 +127,7 @@ function DrawerMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
           </p>
         </div>
       </nav>
-    </>
+    </div>
   );
 }
 
@@ -135,13 +135,15 @@ function BottomNav() {
   const [location] = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 bg-white/80 dark:bg-[#191c1d]/80 backdrop-blur-xl rounded-t-3xl shadow-[0_-4px_20px_rgba(25,28,29,0.06)] md:hidden">
+    <nav aria-label="Main navigation" className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 bg-white/80 dark:bg-[#191c1d]/80 backdrop-blur-xl rounded-t-3xl shadow-[0_-4px_20px_rgba(25,28,29,0.06)] md:hidden">
       {navItems.map((item) => {
         const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
         return (
           <Link key={item.href} href={item.href}>
             <div
-              className={`flex flex-col items-center justify-center px-5 py-2 rounded-2xl transition-all active:scale-90 duration-150 cursor-pointer ${
+              aria-label={item.label}
+              {...(isActive ? { "aria-current": "page" as const } : {})}
+              className={`flex flex-col items-center justify-center px-5 py-3 rounded-2xl transition-all active:scale-90 duration-150 cursor-pointer ${
                 isActive
                   ? "bg-[var(--md3-secondary-container)] text-[var(--md3-on-secondary-container)]"
                   : "text-[var(--md3-outline)] hover:bg-[var(--md3-surface-container-high)]"

@@ -708,13 +708,178 @@ function AreaMeetings() {
   );
 }
 
+interface DallasMeeting {
+  day: string;
+  time: string;
+  tags: string;
+  name: string;
+  address: string;
+  location: string;
+  notes: string;
+}
+
+function DallasAreaMeetings() {
+  const [search, setSearch] = useState("");
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [meetings, setMeetings] = useState<DallasMeeting[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useState(() => {
+    fetch("/data/dallas-meetings.json")
+      .then((r) => r.json())
+      .then((data) => { setMeetings(data); setLoading(false); })
+      .catch(() => setLoading(false));
+  });
+
+  const filtered = meetings.filter((m) => {
+    const matchesSearch = !search ||
+      m.name.toLowerCase().includes(search.toLowerCase()) ||
+      m.address.toLowerCase().includes(search.toLowerCase()) ||
+      m.location.toLowerCase().includes(search.toLowerCase());
+    const matchesDay = !selectedDay || m.day === selectedDay;
+    return matchesSearch && matchesDay;
+  });
+
+  const groupedByDay: Record<string, DallasMeeting[]> = {};
+  filtered.forEach((m) => {
+    if (!groupedByDay[m.day]) groupedByDay[m.day] = [];
+    groupedByDay[m.day].push(m);
+  });
+
+  const dayOrder = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const sortedDays = selectedDay ? [selectedDay] : dayOrder.filter((d) => groupedByDay[d]?.length);
+
+  if (loading) return <div className="text-center py-12 text-muted-foreground">Loading Dallas area meetings...</div>;
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-3 text-sm mb-4">
+        <Badge variant="secondary">{meetings.length} Meetings/Week</Badge>
+        <Badge variant="secondary">{filtered.length} Shown</Badge>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by group name, city, or address..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+      </div>
+
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
+        <Button
+          variant={selectedDay === null ? "default" : "outline"}
+          size="sm"
+          className="shrink-0"
+          onClick={() => setSelectedDay(null)}
+        >
+          All Days
+        </Button>
+        {dayOrder.map((day) => (
+          <Button
+            key={day}
+            variant={selectedDay === day ? "default" : "outline"}
+            size="sm"
+            className="shrink-0"
+            onClick={() => setSelectedDay(day)}
+          >
+            {day}
+          </Button>
+        ))}
+      </div>
+
+      <div className="space-y-6">
+        {sortedDays.map((day) => (
+          <div key={day}>
+            <h3 className="text-lg font-bold text-[var(--md3-primary)] mb-3 flex items-center gap-2">
+              {day}
+              <Badge variant="secondary" className="text-xs">{groupedByDay[day]?.length || 0}</Badge>
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {groupedByDay[day]?.map((m, i) => (
+                <div key={i} className="bg-[var(--md3-surface-container-lowest)] border border-[var(--md3-outline-variant)]/10 rounded-2xl p-4">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h4 className="font-semibold text-sm text-[var(--md3-primary)]">{m.name}</h4>
+                    {m.tags && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--md3-surface-container-highest)] text-[var(--md3-outline)] shrink-0">
+                        {m.tags}
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-1 text-xs text-[var(--md3-outline)]">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3 h-3 shrink-0" />
+                      <span>{m.time}</span>
+                    </div>
+                    {m.address && (
+                      <div className="flex items-start gap-1.5">
+                        <MapPin className="w-3 h-3 shrink-0 mt-0.5" />
+                        <a
+                          href={`https://maps.google.com/?q=${encodeURIComponent(m.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-2 hover:text-foreground"
+                        >
+                          {m.location ? `${m.location}, ${m.address}` : m.address}
+                        </a>
+                      </div>
+                    )}
+                    {m.notes && (
+                      <div className="flex items-start gap-1.5">
+                        <Info className="w-3 h-3 shrink-0 mt-0.5" />
+                        <span className="italic">{m.notes}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>No meetings found matching your search.</p>
+        </div>
+      )}
+
+      <section className="mt-8 p-4 sm:p-6 bg-muted/50 rounded-md">
+        <h2 className="text-lg font-semibold mb-3">Dallas Area Resources</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex items-start gap-3">
+            <Phone className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">DASC Helpline</p>
+              <p className="text-sm text-muted-foreground">1-888-NA-WORKS (1-888-629-6757)</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <Globe className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium">Dallas Area Website</p>
+              <a href="https://dallasareana.org" target="_blank" rel="noopener noreferrer" className="text-sm underline">
+                dallasareana.org
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export default function MeetingsPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
       <div className="mb-6 md:mb-8">
         <h1 className="text-3xl sm:text-[2.75rem] font-extrabold leading-tight text-[var(--md3-primary)] mb-2 tracking-tight">Find Connection.</h1>
         <p className="text-[var(--md3-outline)] text-lg">
-          Find NA meetings at Another Chance and across the Fort Worth area.
+          Find NA meetings at Another Chance and across the DFW area.
         </p>
       </div>
 
@@ -725,7 +890,10 @@ export default function MeetingsPage() {
               <Clock className="w-4 h-4 mr-1" /> Our Meetings
             </TabsTrigger>
             <TabsTrigger value="area-meetings" data-testid="tab-area-meetings">
-              <MapPin className="w-4 h-4 mr-1" /> Area Meetings
+              <MapPin className="w-4 h-4 mr-1" /> FW Area
+            </TabsTrigger>
+            <TabsTrigger value="dallas-meetings" data-testid="tab-dallas-meetings">
+              <MapPin className="w-4 h-4 mr-1" /> Dallas Area
             </TabsTrigger>
           </TabsList>
         </div>
@@ -734,6 +902,9 @@ export default function MeetingsPage() {
         </TabsContent>
         <TabsContent value="area-meetings">
           <AreaMeetings />
+        </TabsContent>
+        <TabsContent value="dallas-meetings">
+          <DallasAreaMeetings />
         </TabsContent>
       </Tabs>
     </div>

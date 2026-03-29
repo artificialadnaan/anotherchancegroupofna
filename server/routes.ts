@@ -27,9 +27,13 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
 
+  if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === "fallback-secret-key") {
+    console.warn("WARNING: SESSION_SECRET is not set or is using the default. Set a secure SESSION_SECRET in production.");
+  }
+
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || "fallback-secret-key",
+      secret: process.env.SESSION_SECRET || require("crypto").randomBytes(32).toString("hex"),
       resave: false,
       saveUninitialized: false,
       cookie: {
