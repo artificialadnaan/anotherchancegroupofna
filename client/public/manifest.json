@@ -1,0 +1,20 @@
+{
+  "name": "Another Chance Group of NA",
+  "short_name": "Another Chance",
+  "description": "Recovery support, meeting schedules, literature, and community for the Another Chance Group of Narcotics Anonymous.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#00355f",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "lifestyle"]
+}

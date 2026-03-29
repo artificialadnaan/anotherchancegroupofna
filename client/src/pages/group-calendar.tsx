@@ -57,8 +57,9 @@ interface CalendarEvent {
   date: Date;
   title: string;
   time: string;
-  type: "birthday" | "speaker" | "conscience" | "gamenight" | "women" | "event";
+  type: "birthday" | "speaker" | "conscience" | "gamenight" | "women" | "event" | "area";
   description?: string;
+  location?: string;
 }
 
 const typeColors: Record<string, { bg: string; text: string; dot: string }> = {
@@ -68,6 +69,7 @@ const typeColors: Record<string, { bg: string; text: string; dot: string }> = {
   gamenight: { bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-800 dark:text-green-200", dot: "bg-green-500" },
   women: { bg: "bg-purple-100 dark:bg-purple-900/30", text: "text-purple-800 dark:text-purple-200", dot: "bg-purple-500" },
   event: { bg: "bg-orange-100 dark:bg-orange-900/30", text: "text-orange-800 dark:text-orange-200", dot: "bg-orange-500" },
+  area: { bg: "bg-teal-100 dark:bg-teal-900/30", text: "text-teal-800 dark:text-teal-200", dot: "bg-teal-500" },
 };
 
 const typeLabels: Record<string, string> = {
@@ -76,8 +78,26 @@ const typeLabels: Record<string, string> = {
   conscience: "Group Conscience",
   gamenight: "Game Night",
   women: "Women's Meeting",
-  event: "Group/Area Event",
+  event: "Group Event",
+  area: "Area Event",
 };
+
+// Area-wide events sourced from fwana.org/calendar
+// Update periodically or when new events are announced at Area Service
+const areaEvents: { title: string; date: string; time: string; endTime?: string; location: string; description?: string }[] = [
+  { title: "TBRCNA", date: "2026-03-06", time: "12:00 PM", location: "Westin Colonnade, 9821 Colonnade Blvd, San Antonio, TX 78230", description: "Texas Bluebonnet Regional Convention" },
+  { title: "TBRCNA", date: "2026-03-07", time: "All Day", location: "Westin Colonnade, San Antonio, TX", description: "Texas Bluebonnet Regional Convention" },
+  { title: "TBRCNA", date: "2026-03-08", time: "All Day", location: "Westin Colonnade, San Antonio, TX", description: "Texas Bluebonnet Regional Convention" },
+  { title: "NA East Speaker Jam", date: "2026-03-08", time: "2:00 PM", location: "NA East, 6465 East Rosedale, Fort Worth, TX 76112" },
+  { title: "Broadway Group Anniversary", date: "2026-03-14", time: "12:00 PM", location: "Broadway Group, 5340 Davis Blvd, Fort Worth, TX 76180" },
+  { title: "Arlington Group Chili Cook-Off", date: "2026-03-15", time: "1:30 PM", location: "Arlington Group, 1863 W. Division St, Arlington, TX 76012" },
+  { title: "FWACNA", date: "2026-03-28", time: "12:00 PM", location: "Step One, 4213 Hwy 377, Fort Worth, TX 76116", description: "Fort Worth Area Convention of NA" },
+  { title: "LSRCNA XLI", date: "2026-04-02", time: "All Day", location: "Hilton DFW Lakes, Grapevine, TX", description: "Lone Star Regional Convention" },
+  { title: "LSRCNA XLI", date: "2026-04-03", time: "All Day", location: "Hilton DFW Lakes, Grapevine, TX", description: "Lone Star Regional Convention" },
+  { title: "LSRCNA XLI", date: "2026-04-04", time: "All Day", location: "Hilton DFW Lakes, Grapevine, TX", description: "Lone Star Regional Convention" },
+  { title: "LSRCNA XLI", date: "2026-04-05", time: "All Day", location: "Hilton DFW Lakes, Grapevine, TX", description: "Lone Star Regional Convention" },
+  { title: "Area Service Conference", date: "2026-04-05", time: "1:30 PM", location: "Back to Basics, Fort Worth, TX" },
+];
 
 export default function GroupCalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -157,6 +177,23 @@ export default function GroupCalendarPage() {
     } catch {}
   });
 
+  // Area-wide events from fwana.org
+  areaEvents.forEach((evt) => {
+    try {
+      const eventDate = parseISO(evt.date);
+      if (eventDate.getMonth() === month && eventDate.getFullYear() === year) {
+        allEvents.push({
+          date: eventDate,
+          title: evt.title,
+          time: evt.time,
+          type: "area",
+          description: evt.description,
+          location: evt.location,
+        });
+      }
+    } catch {}
+  });
+
   const eventsByDate: Record<string, CalendarEvent[]> = {};
   allEvents.forEach((e) => {
     const key = dateKey(e.date);
@@ -187,11 +224,11 @@ export default function GroupCalendarPage() {
   const selectedEvents = selectedDate ? (eventsByDate[selectedDate] || []) : null;
 
   return (
-    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2" data-testid="text-calendar-heading">Calendar</h1>
-        <p className="text-muted-foreground">
-          Group events, special meetings, and activities for the Another Chance Group.
+        <h1 className="text-3xl sm:text-[2.75rem] font-extrabold leading-tight text-[var(--md3-primary)] mb-2 tracking-tight" data-testid="text-calendar-heading">Recovery Timeline</h1>
+        <p className="text-[var(--md3-outline)] text-lg">
+          Plan your journey and stay connected with the fellowship's rhythm.
         </p>
       </div>
 
@@ -297,6 +334,19 @@ export default function GroupCalendarPage() {
                       {evt.description && (
                         <p className="text-xs text-muted-foreground mt-0.5">{evt.description}</p>
                       )}
+                      {evt.location && (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(evt.location)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                          >
+                            {evt.location}
+                          </a>
+                        </div>
+                      )}
                       {evt.type === "birthday" && (
                         <Link href="/birthday-signup">
                           <Button variant="outline" size="sm" className="mt-1.5 h-7 text-xs" data-testid="button-birthday-signup">
@@ -312,6 +362,26 @@ export default function GroupCalendarPage() {
           </CardContent>
         </Card>
       )}
+
+      <Card className="mb-6 border-teal-200 dark:border-teal-800 bg-teal-50/50 dark:bg-teal-950/20">
+        <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${typeColors.area.dot}`} />
+              Fort Worth Area Events
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">
+              Area events from fwana.org are shown on this calendar. Visit their site for the full schedule.
+            </p>
+          </div>
+          <a href="https://fwana.org/calendar/" target="_blank" rel="noopener noreferrer">
+            <Button variant="outline" size="sm" className="shrink-0">
+              <CalendarDays className="w-4 h-4 mr-1.5" />
+              Full Area Calendar
+            </Button>
+          </a>
+        </CardContent>
+      </Card>
 
       <section className="p-4 sm:p-6 bg-muted/50 rounded-md">
         <h2 className="text-lg font-semibold mb-3">Recurring Schedule</h2>

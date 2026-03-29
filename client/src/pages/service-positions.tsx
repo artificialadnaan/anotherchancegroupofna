@@ -15,28 +15,31 @@ import type { ServicePosition } from "@shared/schema";
 
 function PositionCard({ position }: { position: ServicePosition }) {
   return (
-    <AccordionItem value={`position-${position.id}`} className="border rounded-md px-4 mb-3">
+    <AccordionItem
+      value={`position-${position.id}`}
+      className="bg-[var(--md3-surface-container-lowest)] border border-[var(--md3-outline-variant)]/10 rounded-2xl px-4 mb-3"
+    >
       <AccordionTrigger className="py-3" data-testid={`accordion-position-${position.id}`}>
         <div className="flex items-center gap-3 text-left flex-1 mr-2">
-          <div className="flex items-center justify-center w-8 h-8 rounded-md bg-muted shrink-0">
-            <Users className="w-4 h-4 text-muted-foreground" />
+          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-[var(--md3-secondary-container)]/40 shrink-0">
+            <Users className="w-4 h-4 text-[var(--md3-primary)]" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-medium text-sm">{position.title}</span>
+              <span className="font-medium text-sm text-[var(--md3-primary)]">{position.title}</span>
               {position.isFilled ? (
-                <Badge variant="secondary" className="text-xs">
+                <Badge className="text-xs bg-[var(--md3-secondary-container)] text-[var(--md3-on-secondary-container)] hover:bg-[var(--md3-secondary-container)]/80 border-0">
                   <CheckCircle2 className="w-3 h-3 mr-1" />
                   Filled
                 </Badge>
               ) : (
-                <Badge className="text-xs">
+                <Badge className="text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 hover:bg-emerald-100/80 border-0">
                   <AlertCircle className="w-3 h-3 mr-1" />
                   Open
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 flex-wrap">
+            <div className="flex items-center gap-3 text-xs text-[var(--md3-outline)] mt-1 flex-wrap">
               <span className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 {position.cleanTimeRequirement} clean time
@@ -52,40 +55,40 @@ function PositionCard({ position }: { position: ServicePosition }) {
       <AccordionContent>
         <div className="pb-3 space-y-4">
           {position.description && (
-            <p className="text-sm text-muted-foreground leading-relaxed">{position.description}</p>
+            <p className="text-sm text-[var(--md3-outline)] leading-relaxed">{position.description}</p>
           )}
           <div>
-            <h4 className="text-sm font-medium mb-2">Requirements</h4>
+            <h4 className="text-sm font-medium mb-2 text-[var(--md3-primary)]">Requirements</h4>
             <ul className="space-y-1">
-              <li className="text-sm text-muted-foreground flex items-start gap-2">
-                <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+              <li className="text-sm text-[var(--md3-outline)] flex items-start gap-2">
+                <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--md3-outline)]/40" />
                 Must claim Another Chance as home group
               </li>
-              <li className="text-sm text-muted-foreground flex items-start gap-2">
-                <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+              <li className="text-sm text-[var(--md3-outline)] flex items-start gap-2">
+                <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--md3-outline)]/40" />
                 Must be actively working the 12 Steps and learning the 12 Traditions and 12 Concepts
               </li>
-              <li className="text-sm text-muted-foreground flex items-start gap-2">
-                <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+              <li className="text-sm text-[var(--md3-outline)] flex items-start gap-2">
+                <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--md3-outline)]/40" />
                 Must have the willingness, time, and resources to fulfill the commitment
               </li>
-              <li className="text-sm text-muted-foreground flex items-start gap-2">
-                <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+              <li className="text-sm text-[var(--md3-outline)] flex items-start gap-2">
+                <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--md3-outline)]/40" />
                 Must attend the entire Group Conscience Meeting (GCM) each month
               </li>
-              <li className="text-sm text-muted-foreground flex items-start gap-2">
-                <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+              <li className="text-sm text-[var(--md3-outline)] flex items-start gap-2">
+                <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--md3-outline)]/40" />
                 Minimum clean time: {position.cleanTimeRequirement}
               </li>
             </ul>
           </div>
           {position.responsibilities.length > 0 && (
             <div>
-              <h4 className="text-sm font-medium mb-2">Responsibilities</h4>
+              <h4 className="text-sm font-medium mb-2 text-[var(--md3-primary)]">Responsibilities</h4>
               <ul className="space-y-1">
                 {position.responsibilities.map((resp, i) => (
-                  <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />
+                  <li key={i} className="text-sm text-[var(--md3-outline)] flex items-start gap-2">
+                    <span className="shrink-0 mt-1.5 w-1.5 h-1.5 rounded-full bg-[var(--md3-outline)]/40" />
                     {resp}
                   </li>
                 ))}
@@ -93,8 +96,8 @@ function PositionCard({ position }: { position: ServicePosition }) {
             </div>
           )}
           {position.additionalNotes && (
-            <div className="p-3 bg-muted/50 rounded-md">
-              <p className="text-sm text-muted-foreground">{position.additionalNotes}</p>
+            <div className="p-3 bg-[var(--md3-secondary-container)]/20 rounded-xl">
+              <p className="text-sm text-[var(--md3-outline)]">{position.additionalNotes}</p>
             </div>
           )}
         </div>
@@ -107,7 +110,7 @@ function PositionsSkeleton() {
   return (
     <div className="space-y-3">
       {[1, 2, 3, 4, 5].map((i) => (
-        <Skeleton key={i} className="h-20" />
+        <Skeleton key={i} className="h-20 rounded-2xl" />
       ))}
     </div>
   );
@@ -131,26 +134,32 @@ export default function ServicePositionsPage() {
   const openCount = positions?.filter((p) => !p.isFilled).length ?? 0;
 
   return (
-    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Service Positions</h1>
-        <p className="text-muted-foreground mb-4">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[var(--md3-primary)]">Service Positions</h1>
+        <p className="text-[var(--md3-outline)] mb-4">
           Service is a fundamental part of recovery in Narcotics Anonymous. Trusted servants fulfill essential roles that keep our group running. Explore available positions and learn about the requirements for each.
         </p>
         {!isLoading && positions && (
           <div className="flex flex-wrap gap-3">
-            <Badge variant="secondary" data-testid="badge-total-positions">
+            <Badge
+              className="bg-[var(--md3-secondary-container)] text-[var(--md3-on-secondary-container)] hover:bg-[var(--md3-secondary-container)]/80 border-0"
+              data-testid="badge-total-positions"
+            >
               {positions.length} Total Positions
             </Badge>
-            <Badge data-testid="badge-open-positions">
+            <Badge
+              className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 hover:bg-emerald-100/80 border-0"
+              data-testid="badge-open-positions"
+            >
               {openCount} Open Position{openCount !== 1 ? "s" : ""}
             </Badge>
           </div>
         )}
       </div>
 
-      <section className="mb-8 p-4 bg-muted/50 rounded-md">
-        <h2 className="font-semibold mb-2">General Requirements (All Positions)</h2>
+      <section className="mb-8 p-4 bg-[var(--md3-surface-container-lowest)] border border-[var(--md3-outline-variant)]/10 rounded-2xl">
+        <h2 className="font-semibold mb-2 text-[var(--md3-primary)]">General Requirements (All Positions)</h2>
         <ul className="space-y-1">
           {[
             "Must claim Another Chance as home group",
@@ -160,8 +169,8 @@ export default function ServicePositionsPage() {
             "Must resign from other elected trusted servant positions if elected",
             "Must actively participate in regularly scheduled meetings each week",
           ].map((req, i) => (
-            <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-muted-foreground/70" />
+            <li key={i} className="text-sm text-[var(--md3-outline)] flex items-start gap-2">
+              <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-[var(--md3-primary)]/60" />
               {req}
             </li>
           ))}
@@ -197,8 +206,8 @@ export default function ServicePositionsPage() {
       {isLoading && <PositionsSkeleton />}
 
       {error && (
-        <Card className="p-6 text-center">
-          <p className="text-muted-foreground">Unable to load service positions. Please try again later.</p>
+        <Card className="p-6 text-center bg-[var(--md3-surface-container-lowest)] border border-[var(--md3-outline-variant)]/10 rounded-2xl">
+          <p className="text-[var(--md3-outline)]">Unable to load service positions. Please try again later.</p>
         </Card>
       )}
 
@@ -211,10 +220,10 @@ export default function ServicePositionsPage() {
       )}
 
       {!isLoading && !error && filteredPositions?.length === 0 && (
-        <Card className="p-8 text-center">
-          <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="font-semibold mb-2">No Positions Found</h3>
-          <p className="text-sm text-muted-foreground">
+        <Card className="p-8 text-center bg-[var(--md3-surface-container-lowest)] border border-[var(--md3-outline-variant)]/10 rounded-2xl">
+          <Users className="w-12 h-12 mx-auto mb-4 text-[var(--md3-outline)]" />
+          <h3 className="font-semibold mb-2 text-[var(--md3-primary)]">No Positions Found</h3>
+          <p className="text-sm text-[var(--md3-outline)]">
             {selectedCommittee
               ? `No positions in the "${selectedCommittee}" committee.`
               : "Service positions are being updated. Check back soon."}

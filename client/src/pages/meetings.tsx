@@ -160,6 +160,7 @@ interface AreaGroup {
   address: string;
   handicapAccessible: boolean;
   note?: string;
+  isHomeGroup?: boolean;
   schedule: Record<Day, MeetingSlot[]>;
 }
 
@@ -184,14 +185,15 @@ const areaGroups: AreaGroup[] = [
     name: "Another Chance",
     address: "732 Brown Trail, Hurst, TX 76053",
     handicapAccessible: true,
+    isHomeGroup: true,
     schedule: {
       Sunday: [slot("10:00 AM"), slot("6:00 PM")],
-      Monday: [slot("12:00 PM"), slot("6:00 PM"), slot("7:30 PM", ["WOM"])],
-      Tuesday: [slot("12:00 PM", ["LIT"])],
+      Monday: [slot("12:00 PM"), slot("6:00 PM"), slot("7:30 PM", ["WOM", "LIT"])],
+      Tuesday: [slot("12:00 PM"), slot("6:00 PM")],
       Wednesday: [slot("12:00 PM", ["LIT"]), slot("6:00 PM"), slot("8:00 PM", ["LIT"])],
       Thursday: [slot("12:00 PM"), slot("6:00 PM"), slot("7:30 PM", ["MEN"])],
       Friday: [slot("12:00 PM"), slot("6:00 PM")],
-      Saturday: [slot("10:00 AM"), slot("6:00 PM")],
+      Saturday: [slot("10:00 AM"), slot("12:00 PM"), slot("6:00 PM")],
     },
   },
   {
@@ -506,12 +508,20 @@ function GroupCard({ group }: { group: AreaGroup }) {
   const totalMeetings = days.reduce((sum, day) => sum + group.schedule[day].length, 0);
 
   return (
-    <Card className="overflow-hidden" data-testid={`area-group-${group.name.toLowerCase().replace(/\s+/g, "-")}`}>
+    <Card
+      className={`overflow-hidden ${group.isHomeGroup ? "ring-2 ring-primary border-primary bg-primary/5" : ""}`}
+      data-testid={`area-group-${group.name.toLowerCase().replace(/\s+/g, "-")}`}
+    >
       <CardHeader className="pb-2">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
           <div>
             <CardTitle className="text-base flex items-center gap-2 flex-wrap">
               {group.name}
+              {group.isHomeGroup && (
+                <Badge className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0">
+                  Home Group
+                </Badge>
+              )}
               {group.handicapAccessible && (
                 <Accessibility className="w-4 h-4 text-muted-foreground" />
               )}
@@ -567,15 +577,17 @@ function AreaMeetings() {
   const [search, setSearch] = useState("");
   const [selectedDay, setSelectedDay] = useState<Day | null>(null);
 
-  const filteredGroups = areaGroups.filter((group) => {
-    const matchesSearch =
-      !search ||
-      group.name.toLowerCase().includes(search.toLowerCase()) ||
-      group.address.toLowerCase().includes(search.toLowerCase());
-    const matchesDay =
-      !selectedDay || group.schedule[selectedDay].length > 0;
-    return matchesSearch && matchesDay;
-  });
+  const filteredGroups = areaGroups
+    .filter((group) => {
+      const matchesSearch =
+        !search ||
+        group.name.toLowerCase().includes(search.toLowerCase()) ||
+        group.address.toLowerCase().includes(search.toLowerCase());
+      const matchesDay =
+        !selectedDay || group.schedule[selectedDay].length > 0;
+      return matchesSearch && matchesDay;
+    })
+    .sort((a, b) => (a.isHomeGroup ? -1 : b.isHomeGroup ? 1 : 0));
 
   const totalMeetings = filteredGroups.reduce(
     (sum, g) => sum + days.reduce((ds, day) => ds + g.schedule[day].length, 0), 0
@@ -698,10 +710,10 @@ function AreaMeetings() {
 
 export default function MeetingsPage() {
   return (
-    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
       <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Meetings</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-3xl sm:text-[2.75rem] font-extrabold leading-tight text-[var(--md3-primary)] mb-2 tracking-tight">Find Connection.</h1>
+        <p className="text-[var(--md3-outline)] text-lg">
           Find NA meetings at Another Chance and across the Fort Worth area.
         </p>
       </div>

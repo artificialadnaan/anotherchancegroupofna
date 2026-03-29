@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,10 +63,10 @@ export default function NewsletterPage() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
-      <div className="mb-6 md:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Newsletter</h1>
-        <p className="text-muted-foreground">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-6">
+      <div className="mb-8">
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-[var(--md3-primary)]">Newsletter</h1>
+        <p className="text-[var(--md3-outline)]">
           Stay connected with Another Chance Group. Subscribe to receive updates about meetings, events, and service opportunities.
         </p>
       </div>
@@ -75,80 +74,78 @@ export default function NewsletterPage() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
         <div className="lg:col-span-3">
           {subscribed ? (
-            <Card className="text-center p-8">
+            <div className="text-center p-10 bg-[var(--md3-surface-container-lowest)] rounded-3xl border border-[var(--md3-outline-variant)]/10">
               <CheckCircle2 className="w-16 h-16 mx-auto mb-4 text-green-600 dark:text-green-400" />
-              <h2 className="text-xl font-bold mb-2">You're Subscribed</h2>
-              <p className="text-muted-foreground mb-4">
+              <h2 className="text-xl font-bold mb-2 text-[var(--md3-primary)]">You're Subscribed</h2>
+              <p className="text-[var(--md3-outline)] mb-6">
                 Thank you for subscribing to the Another Chance Group newsletter. You'll receive updates about meetings, events, and more.
               </p>
-              <Button
-                variant="outline"
+              <button
                 onClick={() => setSubscribed(false)}
                 data-testid="button-subscribe-another"
+                className="bg-[var(--md3-secondary-container)] text-[var(--md3-on-secondary-container)] rounded-xl px-5 py-2.5 text-sm font-medium"
               >
                 Subscribe Another Email
-              </Button>
-            </Card>
+              </button>
+            </div>
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Mail className="w-5 h-5" />
-                  Subscribe to Updates
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Name (optional)</Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="Your name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      data-testid="input-name"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      data-testid="input-email"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={subscribeMutation.isPending || !email.trim()}
-                    data-testid="button-subscribe"
-                  >
-                    {subscribeMutation.isPending ? "Subscribing..." : "Subscribe"}
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    Your email will only be used for group updates. You can unsubscribe at any time.
-                  </p>
-                </form>
-              </CardContent>
-            </Card>
+            <div className="bg-[var(--md3-surface-container-lowest)] rounded-3xl border border-[var(--md3-outline-variant)]/10 p-6">
+              <h2 className="flex items-center gap-2 text-lg font-semibold text-[var(--md3-primary)] mb-5">
+                <Mail className="w-5 h-5" />
+                Subscribe to Updates
+              </h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="name" className="text-[var(--md3-primary)] font-medium">Name (optional)</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    data-testid="input-name"
+                    className="mt-1 rounded-xl"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email" className="text-[var(--md3-primary)] font-medium">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    data-testid="input-email"
+                    className="mt-1 rounded-xl"
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className="w-full bg-[var(--md3-primary)] text-white rounded-xl"
+                  disabled={subscribeMutation.isPending || !email.trim()}
+                  data-testid="button-subscribe"
+                >
+                  {subscribeMutation.isPending ? "Subscribing..." : "Subscribe"}
+                </Button>
+                <p className="text-xs text-[var(--md3-outline)] text-center">
+                  Your email will only be used for group updates. You can unsubscribe at any time.
+                </p>
+              </form>
+            </div>
           )}
         </div>
 
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="font-semibold text-lg">What You'll Receive</h2>
+          <h2 className="font-semibold text-lg text-[var(--md3-primary)]">What You'll Receive</h2>
           {benefits.map((benefit) => (
-            <div key={benefit.title} className="flex items-start gap-3 p-3 rounded-md bg-muted/50">
-              <div className="flex items-center justify-center w-8 h-8 rounded-md bg-muted shrink-0">
-                <benefit.icon className="w-4 h-4 text-muted-foreground" />
+            <div key={benefit.title} className="flex items-start gap-3 p-4 rounded-2xl bg-[var(--md3-surface-container-lowest)] border border-[var(--md3-outline-variant)]/10">
+              <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-[var(--md3-secondary-container)] shrink-0">
+                <benefit.icon className="w-4 h-4 text-[var(--md3-on-secondary-container)]" />
               </div>
               <div>
-                <h3 className="text-sm font-medium">{benefit.title}</h3>
-                <p className="text-xs text-muted-foreground mt-1">{benefit.description}</p>
+                <h3 className="text-sm font-medium text-[var(--md3-primary)]">{benefit.title}</h3>
+                <p className="text-xs text-[var(--md3-outline)] mt-1">{benefit.description}</p>
               </div>
             </div>
           ))}

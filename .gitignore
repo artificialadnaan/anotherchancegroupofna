@@ -4,3 +4,29 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Replit
+.replit
+.config/
+.local/
+replit.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+
+# OMC
+.omc/
+
+# Agents
+.agents/

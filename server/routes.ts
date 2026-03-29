@@ -12,8 +12,8 @@ declare module "express-session" {
   }
 }
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "password1";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme";
 
 function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (req.session?.isAdmin) {
@@ -36,6 +36,7 @@ export async function registerRoutes(
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
         sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
       },
     })
   );
